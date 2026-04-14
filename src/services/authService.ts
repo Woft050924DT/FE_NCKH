@@ -42,8 +42,9 @@ export const authService = {
    * Get current user profile
    * GET /api/auth/profile
    */
-  async getProfile(): Promise<Profile> {
-    return apiClient.get<Profile>('/api/auth/profile');
+  async getProfile(userId: number, role: 'student' | 'instructor'): Promise<Profile> {
+    const queryParams = `?user_id=${userId}&role=${role}`;
+    return apiClient.get<Profile>(`/api/auth/profile${queryParams}`);
   },
 
   /**

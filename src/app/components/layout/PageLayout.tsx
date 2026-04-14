@@ -3,7 +3,7 @@ import { Sidebar } from './Sidebar';
 
 interface PageLayoutProps {
   children: ReactNode;
-  userRole?: 'student' | 'instructor' | 'head' | 'admin';
+  userRole?: 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
   userName?: string;
   userAvatar?: string;
   title?: string;

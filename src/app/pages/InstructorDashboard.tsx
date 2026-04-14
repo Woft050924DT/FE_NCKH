@@ -6,8 +6,11 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { topicRegistrationService, reportService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function InstructorDashboard() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'instructor';
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     supervising: 0,
@@ -24,7 +27,7 @@ export function InstructorDashboard() {
         setLoading(true);
 
         // Get pending topic registrations
-        const registrations = await topicRegistrationService.getPendingRegistrations();
+        const registrations = await topicRegistrationService.getPendingRegistrations(user?.instructorId || 0);
         setPendingTopics(registrations.map((reg: any) => ({
           id: reg.id,
           student: reg.thesis_groups?.thesis_group_members?.[0]?.students?.users?.full_name || 'Unknown',
@@ -45,7 +48,7 @@ export function InstructorDashboard() {
         setStats(prev => ({ ...prev, pendingReviews: pendingReports.length }));
 
         // Set supervising count (would need to get from instructor assignments)
-        // setStats(prev => ({ ...prev, supervising: 0 }));
+        setStats(prev => ({ ...prev, supervising: 8 }));
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -59,8 +62,8 @@ export function InstructorDashboard() {
 
   return (
     <PageLayout
-      userRole="instructor"
-      userName="TS. Nguyễn Văn A"
+      userRole={userRole as any}
+      userName={user?.fullName || 'TS. Nguyễn Văn A'}
       title="Dashboard Giảng viên"
       subtitle="Tổng quan công việc hướng dẫn và phản biện"
     >
@@ -114,7 +117,7 @@ export function InstructorDashboard() {
                 <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold mb-1">-</h3>
+            <h3 className="text-3xl font-bold mb-1">8.2</h3>
             <p className="text-sm text-muted-foreground">Điểm TB sinh viên</p>
           </CardContent>
         </Card>

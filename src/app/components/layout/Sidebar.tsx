@@ -1,10 +1,11 @@
-import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield } from 'lucide-react';
-import { Link, useLocation } from 'react-router';
+import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { cn } from '../../../utils/cn';
 import { Avatar } from '../ui/Avatar';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface SidebarProps {
-  userRole?: 'student' | 'instructor' | 'head' | 'admin';
+  userRole?: 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
   userName?: string;
   userAvatar?: string;
 }
@@ -43,7 +44,20 @@ const menuItems = {
 
 export function Sidebar({ userRole = 'student', userName = 'Nguyễn Văn A', userAvatar }: SidebarProps) {
   const location = useLocation();
-  const items = menuItems[userRole];
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  // Map department_head to head for menu items
+  const roleKey = userRole === 'department_head' ? 'head' : userRole;
+  const items = menuItems[roleKey] || menuItems['student'];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <div className="w-60 h-screen bg-sidebar text-sidebar-foreground flex flex-col fixed left-0 top-0">
@@ -99,6 +113,13 @@ export function Sidebar({ userRole = 'student', userName = 'Nguyễn Văn A', us
           </div>
           <User className="w-4 h-4 text-sidebar-accent-foreground" />
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 mt-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-left text-sm"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Đăng xuất</span>
+        </button>
       </div>
     </div>
   );

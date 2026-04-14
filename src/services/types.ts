@@ -1,5 +1,5 @@
 // Base Types
-export type UserRole = 'student' | 'instructor' | 'head' | 'admin';
+export type UserRole = 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
 export type GroupMode = 'BOTH' | 'GROUP' | 'INDIVIDUAL';
 export type Status = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'FORMING' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -153,6 +153,7 @@ export interface CreateProposedTopicRequest {
   min_members: number;
   max_members: number;
   reason?: string;
+  instructor_id: number;
 }
 
 export interface ProposedTopic {
@@ -377,7 +378,7 @@ export interface PeerEvaluation {
 export interface ReviewWeeklyReportRequest {
   instructor_feedback: string;
   review_score: number;
-  review_status: Status;
+  review_status: 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 }
 
 export interface ThesisScores {
@@ -391,50 +392,48 @@ export interface ThesisScores {
 // Report Types
 export interface CreateThesisTaskRequest {
   thesis_id: number;
-  task_name: string;
+  task_title: string;
   task_description?: string;
   assigned_to: number;
   due_date: string;
   priority: Priority;
-  status: TaskStatus;
+  start_date: string;
+  student_id: number;
 }
 
 export interface UpdateThesisTaskRequest {
-  task_name?: string;
-  task_description?: string;
-  assigned_to?: number;
-  due_date?: string;
-  priority?: Priority;
   status?: TaskStatus;
+  progress_percentage?: number;
+  notes?: string;
 }
 
 export interface ThesisTask {
   id: number;
   thesis_id: number;
-  task_name: string;
+  task_title: string;
   task_description?: string;
   assigned_to: number;
   due_date: string;
   priority: Priority;
   status: TaskStatus;
+  progress_percentage: number;
 }
 
 export interface CreateWeeklyReportRequest {
   thesis_id: number;
   week_number: number;
   report_content: string;
-  achievements: string;
+  progress_percentage: number;
   challenges: string;
-  next_week_plan: string;
-  attachments?: string[];
+  next_plan: string;
+  student_id: number;
 }
 
 export interface UpdateWeeklyReportRequest {
   report_content?: string;
-  achievements?: string;
+  progress_percentage?: number;
   challenges?: string;
-  next_week_plan?: string;
-  attachments?: string[];
+  next_plan?: string;
 }
 
 export interface WeeklyReport {
@@ -442,13 +441,13 @@ export interface WeeklyReport {
   thesis_id: number;
   week_number: number;
   report_content: string;
-  achievements: string;
+  progress_percentage: number;
   challenges: string;
-  next_week_plan: string;
+  next_plan: string;
   submission_date: string;
   instructor_feedback?: string;
   review_score?: number;
-  review_status?: Status;
+  review_status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 }
 
 export interface AddContributionRequest {
@@ -470,19 +469,18 @@ export interface WeeklyReportContribution {
 
 export interface SubmitFinalReportRequest {
   final_report_file: string;
-  source_code_link?: string;
-  demo_link?: string;
-  submission_notes?: string;
+  outline_file: string;
+  start_date: string;
+  end_date: string;
 }
 
 export interface ThesisProgress {
-  thesis_id: number;
-  overall_progress: number;
-  tasks_completed: number;
-  tasks_total: number;
-  weekly_reports_submitted: number;
-  total_weeks: number;
-  recent_activities?: any[];
+  taskProgress: number;
+  avgProgress: number;
+  totalTasks: number;
+  completedTasks: number;
+  totalReports: number;
+  submittedReports: number;
 }
 
 // Defense Types

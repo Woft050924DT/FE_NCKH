@@ -30,6 +30,15 @@ export const instructorService = {
   },
 
   /**
+   * Get instructor by user ID
+   * GET /api/instructors/by-user/:user_id
+   * No authentication required
+   */
+  async getInstructorByUserId(userId: number): Promise<any> {
+    return apiClient.get<any>(`/api/instructors/by-user/${userId}`, false);
+  },
+
+  /**
    * Create instructor
    * POST /api/instructors
    * No authentication required

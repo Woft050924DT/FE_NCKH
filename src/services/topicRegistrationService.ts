@@ -27,6 +27,18 @@ export const topicRegistrationService = {
   },
 
   /**
+   * Get proposed topics by instructor
+   * GET /api/topic-registrations/proposed-topics?instructor_id=X
+   */
+  async getProposedTopicsByInstructor(instructorId: number, thesisRoundId?: number): Promise<ProposedTopic[]> {
+    const params = new URLSearchParams();
+    params.append('instructor_id', instructorId.toString());
+    if (thesisRoundId) params.append('thesis_round_id', thesisRoundId.toString());
+    const queryParams = params.toString();
+    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics?${queryParams}`, false);
+  },
+
+  /**
    * Create a topic registration (Student only)
    * POST /api/topic-registrations
    */

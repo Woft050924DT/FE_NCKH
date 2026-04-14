@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { topicRegistrationService, defenseService, thesisRoundsService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function HeadDashboard() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'head';
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalTopics: 0,
@@ -23,7 +26,7 @@ export function HeadDashboard() {
         setLoading(true);
 
         // Get topic registrations pending head approval
-        const registrations = await topicRegistrationService.getTopicRegistrations('PENDING');
+        const registrations = await topicRegistrationService.getTopicRegistrations();
         const pendingHeadApprovals = registrations.filter((r: any) => r.instructor_status === 'APPROVED' && r.head_status === 'PENDING');
         setPendingTopics(pendingHeadApprovals.map((reg: any) => ({
           id: reg.id,
@@ -61,8 +64,8 @@ export function HeadDashboard() {
 
   return (
     <PageLayout
-      userRole="head"
-      userName="PGS. TS. Nguyễn Văn A"
+      userRole={userRole as any}
+      userName={user?.fullName || 'PGS. TS. Nguyễn Văn A'}
       title="Dashboard Trưởng Bộ Môn"
       subtitle="Tổng quan quản lý đợt khóa luận"
       actions={

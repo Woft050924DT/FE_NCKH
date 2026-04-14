@@ -12,6 +12,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleDemoLogin = (role: 'student' | 'instructor' | 'head' | 'admin') => {
     localStorage.setItem('token', 'demo-token');
@@ -35,44 +36,20 @@ export function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+    setError('');
+
     try {
-      // Try API login first
-      await authService.login({
+      // Try API login using AuthContext login
+      await login({
         username: username,
         password: password,
       });
-      
-      // Show success alert
-      alert('Đăng nhập thành công!');
-      
+
       // Navigate to dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      // Fallback to demo mode for testing
-      alert('API không phản hồi. Chuyển sang demo mode.');
-      
-      // Determine demo role based on username (simple fallback)
-      let demoRole: 'student' | 'instructor' | 'head' | 'admin' = 'student';
-      if (username.toLowerCase().includes('gv') || username.toLowerCase().includes('instructor')) {
-        demoRole = 'instructor';
-      } else if (username.toLowerCase().includes('head') || username.toLowerCase().includes('trưởng')) {
-        demoRole = 'head';
-      } else if (username.toLowerCase().includes('admin')) {
-        demoRole = 'admin';
-      }
-      
-      // For demo mode, simulate login by storing user info
-      localStorage.setItem('token', 'demo-token');
-      localStorage.setItem('user', JSON.stringify({
-        id: 1,
-        email: username,
-        fullName: 'Demo User',
-        role: demoRole
-      }));
-      
-      navigate('/dashboard');
+      setError('Tên đăng nhập hoặc mật khẩu không đúng!');
     } finally {
       setLoading(false);
     }
@@ -123,12 +100,21 @@ export function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-lg">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
             <Input
               label="Tên đăng nhập"
               type="text"
               placeholder="Nhập tên đăng nhập"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setError('');
+              }}
               required
             />
 
@@ -138,7 +124,10 @@ export function Login() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Nhập mật khẩu"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
                 required
               />
               <button

@@ -10,8 +10,11 @@ import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { thesisGroupsService, topicRegistrationService, reportService, gradingService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function StudentDashboard() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'student';
   const [loading, setLoading] = useState(true);
   const [groupData, setGroupData] = useState<any>(null);
   const [topicData, setTopicData] = useState<any>(null);
@@ -80,7 +83,7 @@ export function StudentDashboard() {
         
         // Get thesis groups
         try {
-          const groups = await thesisGroupsService.getThesisGroups();
+          const groups = await thesisGroupsService.getThesisGroups(user?.id);
           if (groups && groups.length > 0) {
             const activeGroup = groups[0];
             setGroupData({
@@ -176,8 +179,8 @@ export function StudentDashboard() {
   if (loading) {
     return (
       <PageLayout
-        userRole="student"
-        userName="Nguyễn Văn A"
+        userRole={userRole as any}
+        userName={user?.fullName || 'Nguyễn Văn A'}
         title="Dashboard"
         subtitle="Tổng quan tiến độ khóa luận của bạn"
       >
@@ -190,8 +193,8 @@ export function StudentDashboard() {
 
   return (
     <PageLayout
-      userRole="student"
-      userName="Nguyễn Văn A"
+      userRole={userRole as any}
+      userName={user?.fullName || 'Nguyễn Văn A'}
       title="Dashboard"
       subtitle="Tổng quan tiến độ khóa luận của bạn"
     >

@@ -9,8 +9,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function GroupManagement() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'student';
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
   const [isInviteMemberModalOpen, setIsInviteMemberModalOpen] = useState(false);
 
@@ -22,10 +25,10 @@ export function GroupManagement() {
 
   return (
     <PageLayout
-      userRole="student"
-      userName="Nguyễn Văn A"
+      userRole={userRole as any}
+      userName={user?.fullName || 'Nguyễn Văn A'}
       title="Quản lý nhóm"
-      subtitle="Quản lý nhóm khóa luận của bạn"
+      subtitle={userRole === 'admin' ? 'Quản lý tổ chức và nhóm trong hệ thống' : 'Quản lý nhóm khóa luận của bạn'}
     >
       <Tabs defaultValue="my-group">
         <TabsList>

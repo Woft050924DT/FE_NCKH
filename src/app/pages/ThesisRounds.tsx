@@ -7,16 +7,19 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Modal } from '../components/ui/Modal';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function ThesisRounds() {
+  const { user } = useAuth();
+  const userRole = user?.role || 'head';
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const rounds: any[] = [];
 
   return (
     <PageLayout
-      userRole="head"
-      userName="PGS. TS. Nguyễn Văn A"
+      userRole={userRole as any}
+      userName={user?.fullName || 'PGS. TS. Nguyễn Văn A'}
       title="Quản lý đợt khóa luận"
       subtitle="Tạo và quản lý các đợt khóa luận tốt nghiệp"
       actions={
@@ -133,65 +136,134 @@ export function ThesisRounds() {
         size="lg"
       >
         <form className="space-y-6">
+          {/* Thông tin cơ bản */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Thông tin cơ bản</h3>
-            <Input label="Tên đợt khóa luận" placeholder="VD: Khóa luận tốt nghiệp Học kỳ 1" required />
-            <Select
-              label="Loại khóa luận"
-              options={[
-                { value: '1', label: 'Khóa luận tốt nghiệp' },
-                { value: '2', label: 'Đồ án tốt nghiệp' },
-              ]}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input label="Năm học" placeholder="2024-2025" required />
-              <Select
-                label="Học kỳ"
-                options={[
-                  { value: 'HK1', label: 'Học kỳ 1' },
-                  { value: 'HK2', label: 'Học kỳ 2' },
-                  { value: 'HK3', label: 'Học kỳ 3' },
-                ]}
-              />
+            <h3 className="font-semibold text-lg text-foreground">Thông tin cơ bản</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Tên đợt khóa luận <span className="text-destructive">*</span>
+                </label>
+                <Input placeholder="VD: Khóa luận tốt nghiệp Học kỳ 1" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Loại khóa luận <span className="text-destructive">*</span>
+                </label>
+                <Select
+                  options={[
+                    { value: 'thesis', label: 'Khóa luận tốt nghiệp' },
+                    { value: 'project', label: 'Đồ án tốt nghiệp' },
+                  ]}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Năm học <span className="text-destructive">*</span>
+                  </label>
+                  <Select
+                    options={[
+                      { value: '2024-2025', label: '2024-2025' },
+                      { value: '2025-2026', label: '2025-2026' },
+                      { value: '2026-2027', label: '2026-2027' },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Học kỳ <span className="text-destructive">*</span>
+                  </label>
+                  <Select
+                    options={[
+                      { value: 'HK1', label: 'Học kỳ 1' },
+                      { value: 'HK2', label: 'Học kỳ 2' },
+                      { value: 'HK3', label: 'Học kỳ 3' },
+                    ]}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Thời gian */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Thời gian</h3>
+            <h3 className="font-semibold text-lg text-foreground">Thời gian</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Ngày bắt đầu" type="date" required />
-              <Input label="Ngày kết thúc" type="date" required />
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Ngày bắt đầu <span className="text-destructive">*</span>
+                </label>
+                <Input type="date" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Ngày kết thúc <span className="text-destructive">*</span>
+                </label>
+                <Input type="date" required />
+              </div>
             </div>
-            <Input label="Hạn đề xuất đề tài" type="date" />
-            <Input label="Hạn đăng ký" type="date" />
-            <Input label="Hạn nộp báo cáo" type="date" />
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đề xuất đề tài
+                </label>
+                <Input type="date" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đăng ký
+                </label>
+                <Input type="date" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn nộp báo cáo
+                </label>
+                <Input type="date" />
+              </div>
+            </div>
           </div>
 
+          {/* Quy tắc nhóm */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Quy tắc mặc định</h3>
+            <h3 className="font-semibold text-lg text-foreground">Quy tắc nhóm</h3>
             <div>
-              <label className="block text-sm font-medium mb-2">Chế độ nhóm</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="groupMode" value="individual" />
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Chế độ nhóm
+              </label>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="groupMode" value="individual" className="w-4 h-4" />
                   <span className="text-sm">Cá nhân</span>
                 </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="groupMode" value="group" />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="groupMode" value="group" className="w-4 h-4" />
                   <span className="text-sm">Nhóm</span>
                 </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" name="groupMode" value="both" defaultChecked />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="groupMode" value="both" defaultChecked className="w-4 h-4" />
                   <span className="text-sm">Cả hai</span>
                 </label>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Số thành viên tối thiểu" type="number" defaultValue="1" />
-              <Input label="Số thành viên tối đa" type="number" defaultValue="4" />
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Số thành viên tối thiểu
+                </label>
+                <Input type="number" defaultValue="1" min="1" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Số thành viên tối đa
+                </label>
+                <Input type="number" defaultValue="4" min="1" />
+              </div>
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button variant="ghost" type="button" onClick={() => setIsCreateModalOpen(false)}>
               Hủy

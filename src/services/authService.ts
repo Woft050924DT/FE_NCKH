@@ -13,15 +13,18 @@ export const authService = {
    * POST /api/auth/login
    */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>('/api/auth/login', credentials, false);
+    const response = await apiClient.post<{ success: boolean; data: LoginResponse; message: string }>('/api/auth/login', credentials, false);
+    
+    // Extract data from new response format
+    const loginData = response.data;
     
     // Store token in localStorage
-    if (response.token) {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+    if (loginData.token) {
+      localStorage.setItem('token', loginData.token);
+      localStorage.setItem('user', JSON.stringify(loginData.user));
     }
     
-    return response;
+    return loginData;
   },
 
   /**
@@ -29,13 +32,13 @@ export const authService = {
    * POST /api/auth/logout
    */
   async logout(): Promise<LogoutResponse> {
-    const response = await apiClient.post<LogoutResponse>('/api/auth/logout', undefined, false);
+    const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/auth/logout', undefined, false);
     
     // Clear token and user from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     
-    return response;
+    return response.data;
   },
 
   /**
@@ -44,7 +47,8 @@ export const authService = {
    */
   async getProfile(userId: number, role: 'student' | 'instructor'): Promise<Profile> {
     const queryParams = `?user_id=${userId}&role=${role}`;
-    return apiClient.get<Profile>(`/api/auth/profile${queryParams}`);
+    const response = await apiClient.get<{ success: boolean; data: Profile; message: string }>(`/api/auth/profile${queryParams}`);
+    return response.data;
   },
 
   /**

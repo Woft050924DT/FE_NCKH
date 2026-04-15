@@ -58,4 +58,13 @@ export const instructorService = {
   }): Promise<any> {
     return apiClient.post<any>(`/api/instructors`, data, false);
   },
+
+  /**
+   * Get active thesis rounds for instructors
+   * GET /api/instructors/thesis-rounds/active
+   * Authentication required
+   */
+  async getActiveThesisRounds(): Promise<any[]> {
+    return apiClient.get<any[]>(`/api/instructors/thesis-rounds/active`, true);
+  },
 };

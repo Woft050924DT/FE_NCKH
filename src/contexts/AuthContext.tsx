@@ -105,7 +105,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const refreshProfile = async () => {
     try {
-      const profileData = await authService.getProfile(user?.id);
+      if (!user?.id) {
+        console.error('User ID is missing');
+        return;
+      }
+      const role = user.role === 'instructor' ? 'instructor' : 'student';
+      const profileData = await authService.getProfile(user.id, role);
       setProfile(profileData);
     } catch (error) {
       console.error('Failed to fetch profile:', error);

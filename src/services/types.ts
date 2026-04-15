@@ -1,7 +1,7 @@
 // Base Types
 export type UserRole = 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
 export type GroupMode = 'BOTH' | 'GROUP' | 'INDIVIDUAL';
-export type Status = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'FORMING' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
+export type Status = 'DRAFT' | 'Active' | 'COMPLETED' | 'FORMING' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
 export type ReviewStatus = 'PENDING_REVIEW' | 'REVIEW_COMPLETED' | 'PENDING_DEFENSE' | 'DEFENSE_COMPLETED' | 'PREPARING';

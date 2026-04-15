@@ -37,8 +37,9 @@ export function HeadDashboard() {
         })));
 
         // Get thesis rounds for stats
-        const rounds = await thesisRoundsService.getThesisRounds();
-        const activeRound = rounds.find((r: any) => r.status === 'ACTIVE');
+        const roundsResponse = await thesisRoundsService.getThesisRoundsForHead();
+        const rounds = Array.isArray(roundsResponse) ? roundsResponse : (roundsResponse as any).data || [];
+        const activeRound = rounds.find((r: any) => r.status?.toUpperCase() === 'ACTIVE');
         
         // Get defense councils
         // Note: Would need a specific API to get upcoming councils

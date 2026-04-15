@@ -10,6 +10,9 @@ import type {
   WeeklyReportContribution,
   SubmitFinalReportRequest,
   ThesisProgress,
+  SubmitWeeklyReportRequest,
+  WeeklyReportFeedbackRequest,
+  StandardResponse,
 } from './types';
 
 export const reportService = {
@@ -85,5 +88,40 @@ export const reportService = {
    */
   async getThesisProgress(thesisId: number): Promise<ThesisProgress> {
     return apiClient.get<ThesisProgress>(`/api/thesis-progress/${thesisId}`);
+  },
+
+  /**
+   * Submit weekly report for thesis (Student only)
+   * POST /api/theses/:thesisId/weekly-reports
+   */
+  async submitWeeklyReport(thesisId: number, data: SubmitWeeklyReportRequest): Promise<StandardResponse<WeeklyReport>> {
+    return apiClient.post<StandardResponse<WeeklyReport>>(
+      `/api/theses/${thesisId}/weekly-reports`,
+      data
+    );
+  },
+
+  /**
+   * Get weekly reports for thesis (Student member or Instructor supervisor)
+   * GET /api/theses/:thesisId/weekly-reports
+   */
+  async getThesisWeeklyReports(thesisId: number): Promise<StandardResponse<WeeklyReport[]>> {
+    return apiClient.get<StandardResponse<WeeklyReport[]>>(
+      `/api/theses/${thesisId}/weekly-reports`
+    );
+  },
+
+  /**
+   * Provide feedback on weekly report (Instructor only)
+   * PATCH /api/weekly-reports/:reportId/feedback
+   */
+  async provideWeeklyReportFeedback(
+    reportId: number,
+    data: WeeklyReportFeedbackRequest
+  ): Promise<StandardResponse<WeeklyReport>> {
+    return apiClient.patch<StandardResponse<WeeklyReport>>(
+      `/api/weekly-reports/${reportId}/feedback`,
+      data
+    );
   },
 };

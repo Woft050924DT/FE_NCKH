@@ -12,6 +12,7 @@ import { DefenseCouncils } from './pages/DefenseCouncils';
 import { SystemSettings } from './pages/SystemSettings';
 import { HeadReports } from './pages/HeadReports';
 import { HeadMessages } from './pages/HeadMessages';
+import { HeadAssignInstructors } from './pages/HeadAssignInstructors';
 import { ThesisRounds } from './pages/ThesisRounds';
 import { Messages } from './pages/Messages';
 import { WeeklyReports } from './pages/WeeklyReports';
@@ -86,6 +87,11 @@ function AppRoutes() {
       <Route path="/rounds" element={
         <ProtectedRoute>
           {(userRole === 'head' || userRole === 'department_head') && <ThesisRounds />}
+        </ProtectedRoute>
+      } />
+      <Route path="/assign-instructors" element={
+        <ProtectedRoute>
+          {(userRole === 'head' || userRole === 'department_head') && <HeadAssignInstructors />}
         </ProtectedRoute>
       } />
       <Route path="/messages" element={

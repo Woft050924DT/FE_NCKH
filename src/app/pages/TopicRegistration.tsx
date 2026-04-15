@@ -31,7 +31,6 @@ export function TopicRegistration() {
   // Student info (should come from auth context)
   const [studentId, setStudentId] = useState<number>(1); // TODO: Get from auth context
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,41 +41,61 @@ export function TopicRegistration() {
         console.log('Fetching thesis rounds...');
         const rounds = await thesisRoundsService.getThesisRounds();
         console.log('Thesis rounds:', rounds);
+        const activeRound = rounds.find((r: any) => r.status?.toUpperCase() === 'ACTIVE');
+        console.log('Active round:', activeRound);
         setThesisRounds(rounds);
 
-        // Auto-select active round if exists
-        const activeRound = rounds.find((r: any) => r.status === 'ACTIVE');
         if (activeRound) {
-          setSelectedRoundId(activeRound.id);
-        }
+          // Get proposed topics for the active round
+          try {
+            const topics = await topicRegistrationService.getProposedTopics(activeRound.id);
+            setProposedTopics(topics.map((t: any) => ({
+              id: t.id,
+              code: t.topic_code,
+              title: t.topic_title,
+              description: t.topic_description,
+              technologies: t.technologies_used?.split(', ') || [],
+              groupMode: t.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : t.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' : 'Cả hai',
+              minMembers: t.proposed_topic_rules?.min_members || 1,
+              maxMembers: t.proposed_topic_rules?.max_members || 1,
+              isTaken: t.is_taken,
+              instructorId: t.instructors?.id,
+            })));
+          } catch (e) {
+            console.error('Error fetching topics:', e);
+          }
 
-        // Get instructors from API
-        console.log('Fetching instructors...');
-        try {
-          const instructorsData = await instructorService.getInstructors();
-          console.log('Instructors fetched:', instructorsData);
-          console.log('Number of instructors:', instructorsData?.length || 0);
-          const mappedInstructors = instructorsData.map((instructor: any) => ({
-            id: instructor.id,
-            instructorCode: instructor.instructor_code || '',
-            name: instructor.users?.full_name || 'Unknown',
-            degree: instructor.academic_title || instructor.degree || 'Giảng viên',
-            specialization: instructor.specialization || '',
-            currentLoad: instructor.instructor_assignments?.[0]?.current_load || 0,
-            quota: instructor.instructor_assignments?.[0]?.supervision_quota || 0,
-            department: instructor.departments_instructors_department_idTodepartments?.department_name || '',
-            email: instructor.users?.email || '',
-            phone: instructor.users?.phone || '',
-            yearsOfExperience: instructor.years_of_experience || 0,
-            avatar: instructor.users?.avatar || '',
-            status: instructor.status || true,
-          }));
-          console.log('Mapped instructors:', mappedInstructors);
-          setInstructors(mappedInstructors);
-          setFilteredInstructors(mappedInstructors);
-        } catch (e) {
-          console.error('Error fetching instructors:', e);
-          alert('Lỗi khi tải danh sách giảng viên: ' + (e as any).message);
+          // Get instructors from API
+          console.log('Fetching instructors for thesis round:', activeRound.id);
+          try {
+            const instructorsData = await instructorService.getInstructors({ thesis_round_id: activeRound.id });
+            console.log('Instructors fetched:', instructorsData);
+            console.log('Number of instructors:', instructorsData?.length || 0);
+            const mappedInstructors = instructorsData.map((instructor: any) => ({
+              id: instructor.id,
+              instructorCode: instructor.instructor_code || '',
+              name: instructor.users?.full_name || 'Unknown',
+              degree: instructor.academic_title || instructor.degree || 'Giảng viên',
+              specialization: instructor.specialization || '',
+              currentLoad: instructor.instructor_assignments?.[0]?.current_load || 0,
+              quota: instructor.instructor_assignments?.[0]?.supervision_quota || 0,
+              department: instructor.departments_instructors_department_idTodepartments?.department_name || '',
+              email: instructor.users?.email || '',
+              phone: instructor.users?.phone || '',
+              yearsOfExperience: instructor.years_of_experience || 0,
+              avatar: instructor.users?.avatar || '',
+              status: instructor.status || true,
+            }));
+            console.log('Mapped instructors:', mappedInstructors);
+            setInstructors(mappedInstructors);
+            setFilteredInstructors(mappedInstructors);
+          } catch (e) {
+            console.error('Error fetching instructors:', e);
+            alert('Lỗi khi tải danh sách giảng viên: ' + (e as any).message);
+          }
+        } else {
+          console.log('No active thesis round found');
+          alert('Không tìm thấy đợt đồ án hoạt động. Vui lòng liên hệ quản trị viên.');
         }
 
         // Get thesis groups
@@ -96,33 +115,6 @@ export function TopicRegistration() {
 
     fetchData();
   }, []);
-
-  // Load topics when round is selected
-  useEffect(() => {
-    const loadTopics = async () => {
-      if (selectedRoundId) {
-        try {
-          const topics = await topicRegistrationService.getProposedTopics(selectedRoundId);
-          setProposedTopics(topics.map((t: any) => ({
-            id: t.id,
-            code: t.topic_code,
-            title: t.topic_title,
-            description: t.topic_description,
-            technologies: t.technologies_used?.split(', ') || [],
-            groupMode: t.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : t.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' : 'Cả hai',
-            minMembers: t.proposed_topic_rules?.min_members || 1,
-            maxMembers: t.proposed_topic_rules?.max_members || 1,
-            isTaken: t.is_taken,
-            instructorId: t.instructors?.id,
-          })));
-        } catch (e) {
-          console.error('Error fetching topics:', e);
-        }
-      }
-    };
-
-    loadTopics();
-  }, [selectedRoundId]);
 
   const steps = [
     { number: 1, title: 'Chọn GV hướng dẫn' },
@@ -152,8 +144,14 @@ export function TopicRegistration() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedInstructor || !selectedGroupId || !selectedRoundId) {
-      alert('Vui lòng chọn đợt đồ án, giảng viên và nhóm');
+    if (!selectedInstructor || !selectedGroupId) {
+      alert('Vui lòng chọn giảng viên và nhóm');
+      return;
+    }
+
+    const activeRound = thesisRounds.find((r: any) => r.status?.toUpperCase() === 'ACTIVE');
+    if (!activeRound) {
+      alert('Không tìm thấy đợt đồ án hoạt động');
       return;
     }
 
@@ -172,7 +170,7 @@ export function TopicRegistration() {
 
       const registrationData = {
         thesis_group_id: selectedGroupId,
-        thesis_round_id: selectedRoundId,
+        thesis_round_id: activeRound.id,
         instructor_id: selectedInstructor,
         proposed_topic_id: topicMode === 'proposed' ? selectedTopic ?? undefined : undefined,
         self_proposed_title: topicMode === 'self' ? selfProposedTitle : undefined,
@@ -209,28 +207,6 @@ export function TopicRegistration() {
       title="Đăng ký đề tài"
       subtitle="Đăng ký đề tài khóa luận cho nhóm của bạn"
     >
-      {/* Thesis Round Selection */}
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium whitespace-nowrap">Đợt đồ án:</label>
-            <select
-              className="flex-1 px-3 py-2 bg-background border border-input rounded-lg"
-              value={selectedRoundId || ''}
-              onChange={(e) => setSelectedRoundId(Number(e.target.value))}
-              disabled={loading}
-            >
-              <option value="">Chọn đợt đồ án</option>
-              {thesisRounds.map((round) => (
-                <option key={round.id} value={round.id}>
-                  {round.round_name} - {round.semester} ({round.status === 'ACTIVE' ? 'Đang hoạt động' : round.status})
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Progress Stepper */}
       <div className="mb-8">
         <div className="flex items-center justify-center">

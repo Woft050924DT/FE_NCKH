@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../components/ui/Select';
 import { Modal } from '../components/ui/Modal';
-import { topicRegistrationService, thesisRoundsService } from '../../services';
+import { topicRegistrationService, thesisRoundsService, instructorService } from '../../services';
 import { useAuth } from '../../contexts/AuthContext';
 import type { ProposedTopic, CreateProposedTopicRequest, ThesisRound } from '../../services/types';
 
@@ -20,6 +20,8 @@ export function MyTopics() {
   const [error, setError] = useState<string | null>(null);
   const [thesisRounds, setThesisRounds] = useState<ThesisRound[]>([]);
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'rounds' | 'topics'>('rounds');
+  const [selectedRound, setSelectedRound] = useState<ThesisRound | null>(null);
   const [formData, setFormData] = useState<CreateProposedTopicRequest>({
     topic_code: '',
     topic_title: '',
@@ -44,17 +46,55 @@ export function MyTopics() {
   }, [selectedRoundId]);
 
   const fetchThesisRounds = async () => {
+    console.log('Calling API: /api/instructor/thesis-rounds');
     try {
-      const data = await thesisRoundsService.getThesisRounds();
-      setThesisRounds(data);
-      if (data.length > 0) {
-        setSelectedRoundId(data[0].id);
+      const data = await thesisRoundsService.getThesisRoundsForInstructor();
+      console.log('API Response:', data);
+      console.log('Response type:', typeof data);
+      console.log('Is array:', Array.isArray(data));
+      console.log('Keys:', Object.keys(data || {}));
+      console.log('First item structure:', Array.isArray(data) && data[0] ? JSON.stringify(data[0], null, 2) : 'Not an array or empty');
+      
+      // Handle different response formats
+      let roundsArray: ThesisRound[] = [];
+      if (Array.isArray(data)) {
+        roundsArray = data;
+      } else if (data && typeof data === 'object') {
+        const dataObj = data as any;
+        // Check if it has a data property
+        if (dataObj.data && Array.isArray(dataObj.data)) {
+          roundsArray = dataObj.data;
+        } else if (dataObj.success && dataObj.data && Array.isArray(dataObj.data)) {
+          roundsArray = dataObj.data;
+        } else {
+          // Try to get values from the object
+          const values = Object.values(dataObj);
+          if (values.length > 0 && Array.isArray(values[0])) {
+            roundsArray = values[0];
+          } else {
+            roundsArray = values as ThesisRound[];
+          }
+        }
       }
+      
+      console.log('Final rounds array:', roundsArray);
+      setThesisRounds(roundsArray);
     } catch (err) {
       console.error('Error fetching thesis rounds:', err);
-      // Don't set error state - just continue without thesis rounds filter
       setThesisRounds([]);
     }
+  };
+
+  const handleSelectRound = (round: ThesisRound) => {
+    setSelectedRound(round);
+    setSelectedRoundId(round.id);
+    setViewMode('topics');
+  };
+
+  const handleBackToRounds = () => {
+    setViewMode('rounds');
+    setSelectedRound(null);
+    setSelectedRoundId(null);
   };
 
   const fetchTopics = async () => {
@@ -114,13 +154,20 @@ export function MyTopics() {
     <PageLayout
       userRole={userRole as any}
       userName={user?.fullName || 'Giảng viên'}
-      title="Đề tài của tôi"
-      subtitle="Quản lý các đề tài đã đề xuất"
+      title={viewMode === 'rounds' ? 'Đợt khóa luận' : selectedRound?.round_name || 'Đề tài của tôi'}
+      subtitle={viewMode === 'rounds' ? 'Chọn đợt khóa luận để xem đề tài' : 'Quản lý các đề tài đã đề xuất'}
       actions={
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Đề xuất đề tài mới
-        </Button>
+        viewMode === 'topics' ? (
+          <>
+            <Button variant="ghost" onClick={handleBackToRounds}>
+              ← Quay lại
+            </Button>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Đề xuất đề tài mới
+            </Button>
+          </>
+        ) : null
       }
     >
       {error && (
@@ -135,111 +182,157 @@ export function MyTopics() {
         </div>
       ) : (
         <>
-          {/* Filters */}
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className={`grid gap-4 ${thesisRounds.length > 0 ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input placeholder="Tìm kiếm đề tài..." className="pl-10" />
-                </div>
-                {thesisRounds.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Đợt khóa luận</label>
-                    <Select
-                      value={selectedRoundId?.toString()}
-                      onValueChange={(value) => setSelectedRoundId(value ? parseInt(value) : null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn đợt khóa luận" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {thesisRounds.map((round) => (
-                          <SelectItem key={round.id} value={round.id.toString()}>
-                            {round.round_name || `Đợt ${round.id}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Topics Grid */}
-          {topics.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">Chưa có đề tài nào</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {topics.map((topic) => (
-                <Card key={topic.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <CardTitle className="text-base">{topic.topic_title}</CardTitle>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Mã: {topic.topic_code}</p>
-                      </div>
-                      <Badge variant={topic.is_taken ? 'secondary' : 'outline'}>
-                        {topic.is_taken ? 'Đã có nhóm' : 'Còn trống'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                      {topic.topic_description}
-                    </p>
-
-                    <div className="mb-4">
-                      <p className="text-xs text-muted-foreground mb-2">Công nghệ</p>
-                      <div className="flex flex-wrap gap-2">
-                        {topic.technologies_used && topic.technologies_used.split(',').map((tech, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tech.trim()}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mb-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Chế độ: </span>
-                        <span className="font-medium">
-                          {topic.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' :
-                           topic.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : 'Cả hai'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Thành viên: </span>
-                        <span className="font-medium">
-                          {topic.proposed_topic_rules?.min_members}-{topic.proposed_topic_rules?.max_members}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="ghost" className="flex-1">
-                        <Eye className="w-4 h-4" />
-                        Xem
-                      </Button>
-                      <Button size="sm" variant="ghost" className="flex-1">
-                        <Edit className="w-4 h-4" />
-                        Sửa
-                      </Button>
-                      <Button size="sm" variant="ghost">
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
+          {viewMode === 'rounds' ? (
+            /* Rounds List */
+            <>
+              {thesisRounds.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">Không có đợt khóa luận nào đang mở</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {thesisRounds.map((round) => {
+                    const roundData = round as any;
+                    return (
+                    <Card
+                      key={round.id}
+                      className="hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => handleSelectRound(round)}
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-lg">
+                          {roundData.round_name || roundData.roundName || `Đợt ${round.id}`}
+                        </CardTitle>
+                        <CardDescription>
+                          {roundData.academic_year || roundData.academicYear || 'N/A'} - HK{roundData.semester || 'N/A'}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Bắt đầu:</span>
+                            <span className="font-medium">
+                              {roundData.start_date ? new Date(roundData.start_date).toLocaleDateString('vi-VN') : 
+                               roundData.startDate ? new Date(roundData.startDate).toLocaleDateString('vi-VN') : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Kết thúc:</span>
+                            <span className="font-medium">
+                              {roundData.end_date ? new Date(roundData.end_date).toLocaleDateString('vi-VN') : 
+                               roundData.endDate ? new Date(roundData.endDate).toLocaleDateString('vi-VN') : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Hạn đăng ký:</span>
+                            <span className="font-medium">
+                              {roundData.registration_deadline ? new Date(roundData.registration_deadline).toLocaleDateString('vi-VN') : 
+                               roundData.registrationDeadline ? new Date(roundData.registrationDeadline).toLocaleDateString('vi-VN') : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="pt-2">
+                            <Badge variant={roundData.status === 'Active' ? 'default' : 'secondary'}>
+                              {roundData.status || 'Unknown'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Topics List */
+            <>
+              {/* Search */}
+              <Card className="mb-6">
+                <CardContent className="p-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input placeholder="Tìm kiếm đề tài..." className="pl-10" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Topics Grid */}
+              {topics.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">Chưa có đề tài nào</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {topics.map((topic) => (
+                    <Card key={topic.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <CardTitle className="text-base">{topic.topic_title}</CardTitle>
+                            </div>
+                            <p className="text-sm text-muted-foreground">Mã: {topic.topic_code}</p>
+                          </div>
+                          <Badge variant={topic.is_taken ? 'secondary' : 'outline'}>
+                            {topic.is_taken ? 'Đã có nhóm' : 'Còn trống'}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                          {topic.topic_description}
+                        </p>
+
+                        <div className="mb-4">
+                          <p className="text-xs text-muted-foreground mb-2">Công nghệ</p>
+                          <div className="flex flex-wrap gap-2">
+                            {topic.technologies_used && topic.technologies_used.split(',').map((tech, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tech.trim()}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Chế độ: </span>
+                            <span className="font-medium">
+                              {topic.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' :
+                               topic.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : 'Cả hai'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Thành viên: </span>
+                            <span className="font-medium">
+                              {topic.proposed_topic_rules?.min_members}-{topic.proposed_topic_rules?.max_members}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="ghost" className="flex-1">
+                            <Eye className="w-4 h-4" />
+                            Xem
+                          </Button>
+                          <Button size="sm" variant="ghost" className="flex-1">
+                            <Edit className="w-4 h-4" />
+                            Sửa
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}

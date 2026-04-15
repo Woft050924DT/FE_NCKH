@@ -4,6 +4,10 @@ import type {
   ThesisGroup,
   CreateGroupInvitationRequest,
   GroupInvitation,
+  InviteMemberRequest,
+  RespondInvitationRequest,
+  RegisterTopicRequest,
+  StandardResponse,
 } from './types';
 
 export const thesisGroupsService = {
@@ -57,5 +61,55 @@ export const thesisGroupsService = {
    */
   async getInvitations(studentId: number): Promise<GroupInvitation[]> {
     return apiClient.get<GroupInvitation[]>(`/api/thesis-groups/invitations?student_id=${studentId}`);
+  },
+
+  /**
+   * Create group in thesis round (Student only)
+   * POST /api/thesis-rounds/:roundId/groups
+   */
+  async createGroupInRound(
+    roundId: number,
+    data: { groupName?: string; groupType: 'INDIVIDUAL' | 'GROUP' }
+  ): Promise<StandardResponse<ThesisGroup>> {
+    return apiClient.post<StandardResponse<ThesisGroup>>(
+      `/api/thesis-rounds/${roundId}/groups`,
+      data
+    );
+  },
+
+  /**
+   * Invite member to group (Student - LEADER only)
+   * POST /api/groups/:groupId/invite
+   */
+  async inviteMember(groupId: number, data: InviteMemberRequest): Promise<StandardResponse<GroupInvitation>> {
+    return apiClient.post<StandardResponse<GroupInvitation>>(
+      `/api/groups/${groupId}/invite`,
+      data
+    );
+  },
+
+  /**
+   * Respond to group invitation (Student only)
+   * PATCH /api/invitations/:invitationId/respond
+   */
+  async respondInvitation(
+    invitationId: number,
+    data: RespondInvitationRequest
+  ): Promise<StandardResponse<GroupInvitation>> {
+    return apiClient.patch<StandardResponse<GroupInvitation>>(
+      `/api/invitations/${invitationId}/respond`,
+      data
+    );
+  },
+
+  /**
+   * Register topic for group (Student - LEADER only)
+   * POST /api/groups/:groupId/register-topic
+   */
+  async registerTopic(groupId: number, data: RegisterTopicRequest): Promise<StandardResponse<any>> {
+    return apiClient.post<StandardResponse<any>>(
+      `/api/groups/${groupId}/register-topic`,
+      data
+    );
   },
 };

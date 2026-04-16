@@ -27,7 +27,7 @@ export function InstructorDashboard() {
         setLoading(true);
 
         // Get pending topic registrations
-        const registrations = await topicRegistrationService.getPendingRegistrations(user?.instructorId || 0);
+        const registrations = await topicRegistrationService.getPendingRegistrations(user?.instructorId || user?.id || 0);
         setPendingTopics(registrations.map((reg: any) => ({
           id: reg.id,
           student: reg.thesis_groups?.thesis_group_members?.[0]?.students?.users?.full_name || 'Unknown',

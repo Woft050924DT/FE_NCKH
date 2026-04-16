@@ -31,7 +31,7 @@ export function MyTopics() {
     technologies_used: '',
     topic_references: '',
     thesis_round_id: 1,
-    group_mode: 'GROUP',
+    group_mode: 'GROUP_ONLY',
     min_members: 2,
     max_members: 4,
     instructor_id: 0,
@@ -101,8 +101,9 @@ export function MyTopics() {
     try {
       setLoading(true);
       setError(null);
-      if (user?.instructorId) {
-        const data = await topicRegistrationService.getProposedTopicsByInstructor(user.instructorId, selectedRoundId || undefined);
+      const instructorId = user?.instructorId || user?.id;
+      if (instructorId) {
+        const data = await topicRegistrationService.getProposedTopicsByInstructor(instructorId, selectedRoundId || undefined);
         setTopics(data);
       }
     } catch (err) {
@@ -116,14 +117,15 @@ export function MyTopics() {
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!user?.instructorId) {
+      const instructorId = user?.instructorId || user?.id;
+      if (!instructorId) {
         setError('Không tìm thấy thông tin giảng viên');
         return;
       }
 
       const topicData: CreateProposedTopicRequest = {
         ...formData,
-        instructor_id: user.instructorId,
+        instructor_id: instructorId,
         thesis_round_id: selectedRoundId || formData.thesis_round_id,
       };
 
@@ -138,7 +140,7 @@ export function MyTopics() {
         technologies_used: '',
         topic_references: '',
         thesis_round_id: selectedRoundId || 1,
-        group_mode: 'GROUP',
+        group_mode: 'GROUP_ONLY',
         min_members: 2,
         max_members: 4,
         instructor_id: 0,
@@ -302,8 +304,8 @@ export function MyTopics() {
                           <div>
                             <span className="text-muted-foreground">Chế độ: </span>
                             <span className="font-medium">
-                              {topic.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' :
-                               topic.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : 'Cả hai'}
+                              {topic.proposed_topic_rules?.group_mode === 'INDIVIDUAL_ONLY' ? 'Cá nhân' :
+                               topic.proposed_topic_rules?.group_mode === 'GROUP_ONLY' ? 'Nhóm' : 'Cả hai'}
                             </span>
                           </div>
                           <div>
@@ -436,8 +438,8 @@ export function MyTopics() {
                   <input
                     type="radio"
                     name="groupMode"
-                    value="INDIVIDUAL"
-                    checked={formData.group_mode === 'INDIVIDUAL'}
+                    value="INDIVIDUAL_ONLY"
+                    checked={formData.group_mode === 'INDIVIDUAL_ONLY'}
                     onChange={(e) => setFormData({ ...formData, group_mode: e.target.value as any })}
                   />
                   <span className="text-sm">Cá nhân</span>
@@ -446,8 +448,8 @@ export function MyTopics() {
                   <input
                     type="radio"
                     name="groupMode"
-                    value="GROUP"
-                    checked={formData.group_mode === 'GROUP'}
+                    value="GROUP_ONLY"
+                    checked={formData.group_mode === 'GROUP_ONLY'}
                     onChange={(e) => setFormData({ ...formData, group_mode: e.target.value as any })}
                   />
                   <span className="text-sm">Nhóm</span>

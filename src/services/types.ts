@@ -1,6 +1,6 @@
 // Base Types
 export type UserRole = 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
-export type GroupMode = 'BOTH' | 'GROUP' | 'INDIVIDUAL';
+export type GroupMode = 'BOTH' | 'GROUP_ONLY' | 'INDIVIDUAL_ONLY';
 export type Status = 'DRAFT' | 'Active' | 'COMPLETED' | 'FORMING' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
@@ -183,7 +183,7 @@ export interface ProposedTopic {
 }
 
 export interface CreateTopicRegistrationRequest {
-  thesis_group_id: number;
+  thesis_group_id?: number;
   thesis_round_id: number;
   instructor_id: number;
   proposed_topic_id?: number;

@@ -13,6 +13,7 @@ export function TopicRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedInstructor, setSelectedInstructor] = useState<number | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<number | null>(null);
+  const [selectedRound, setSelectedRound] = useState<number | null>(null);
   const [topicMode, setTopicMode] = useState<'proposed' | 'self'>('proposed');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -31,72 +32,22 @@ export function TopicRegistration() {
   // Student info (should come from auth context)
   const [studentId, setStudentId] = useState<number>(1); // TODO: Get from auth context
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
+  const [registrationMode, setRegistrationMode] = useState<'group' | 'individual'>('group');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Get thesis rounds
-        console.log('Fetching thesis rounds...');
-        const rounds = await thesisRoundsService.getThesisRounds();
+
+        // Get thesis rounds for students
+        console.log('Fetching thesis rounds for students...');
+        const response = await thesisRoundsService.getThesisRoundsForStudent();
+        console.log('Thesis rounds response:', response);
+
+        // Handle response with success/data format
+        const rounds = response.success ? response.data : [];
         console.log('Thesis rounds:', rounds);
-        const activeRound = rounds.find((r: any) => r.status?.toUpperCase() === 'ACTIVE');
-        console.log('Active round:', activeRound);
         setThesisRounds(rounds);
-
-        if (activeRound) {
-          // Get proposed topics for the active round
-          try {
-            const topics = await topicRegistrationService.getProposedTopics(activeRound.id);
-            setProposedTopics(topics.map((t: any) => ({
-              id: t.id,
-              code: t.topic_code,
-              title: t.topic_title,
-              description: t.topic_description,
-              technologies: t.technologies_used?.split(', ') || [],
-              groupMode: t.proposed_topic_rules?.group_mode === 'GROUP' ? 'Nhóm' : t.proposed_topic_rules?.group_mode === 'INDIVIDUAL' ? 'Cá nhân' : 'Cả hai',
-              minMembers: t.proposed_topic_rules?.min_members || 1,
-              maxMembers: t.proposed_topic_rules?.max_members || 1,
-              isTaken: t.is_taken,
-              instructorId: t.instructors?.id,
-            })));
-          } catch (e) {
-            console.error('Error fetching topics:', e);
-          }
-
-          // Get instructors from API
-          console.log('Fetching instructors for thesis round:', activeRound.id);
-          try {
-            const instructorsData = await instructorService.getInstructors({ thesis_round_id: activeRound.id });
-            console.log('Instructors fetched:', instructorsData);
-            console.log('Number of instructors:', instructorsData?.length || 0);
-            const mappedInstructors = instructorsData.map((instructor: any) => ({
-              id: instructor.id,
-              instructorCode: instructor.instructor_code || '',
-              name: instructor.users?.full_name || 'Unknown',
-              degree: instructor.academic_title || instructor.degree || 'Giảng viên',
-              specialization: instructor.specialization || '',
-              currentLoad: instructor.instructor_assignments?.[0]?.current_load || 0,
-              quota: instructor.instructor_assignments?.[0]?.supervision_quota || 0,
-              department: instructor.departments_instructors_department_idTodepartments?.department_name || '',
-              email: instructor.users?.email || '',
-              phone: instructor.users?.phone || '',
-              yearsOfExperience: instructor.years_of_experience || 0,
-              avatar: instructor.users?.avatar || '',
-              status: instructor.status || true,
-            }));
-            console.log('Mapped instructors:', mappedInstructors);
-            setInstructors(mappedInstructors);
-            setFilteredInstructors(mappedInstructors);
-          } catch (e) {
-            console.error('Error fetching instructors:', e);
-            alert('Lỗi khi tải danh sách giảng viên: ' + (e as any).message);
-          }
-        } else {
-          console.log('No active thesis round found');
-          alert('Không tìm thấy đợt đồ án hoạt động. Vui lòng liên hệ quản trị viên.');
-        }
 
         // Get thesis groups
         try {
@@ -115,6 +66,76 @@ export function TopicRegistration() {
 
     fetchData();
   }, []);
+
+  // Fetch instructors when a round is selected
+  useEffect(() => {
+    const fetchInstructorsForRound = async () => {
+      if (!selectedRound) {
+        setInstructors([]);
+        setFilteredInstructors([]);
+        setProposedTopics([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        // Get proposed topics for the selected round
+        try {
+          const topics = await topicRegistrationService.getProposedTopics(selectedRound);
+          setProposedTopics(topics.map((t: any) => ({
+            id: t.id,
+            code: t.topic_code,
+            title: t.topic_title,
+            description: t.topic_description,
+            technologies: t.technologies_used?.split(', ') || [],
+            groupMode: t.proposed_topic_rules?.group_mode === 'GROUP_ONLY' ? 'Nhóm' : t.proposed_topic_rules?.group_mode === 'INDIVIDUAL_ONLY' ? 'Cá nhân' : 'Cả hai',
+            minMembers: t.proposed_topic_rules?.min_members || 1,
+            maxMembers: t.proposed_topic_rules?.max_members || 1,
+            isTaken: t.is_taken,
+            instructorId: t.instructors?.id,
+          })));
+        } catch (e) {
+          console.error('Error fetching topics:', e);
+        }
+
+        // Get instructors from API
+        console.log('Fetching instructors for thesis round:', selectedRound);
+        try {
+          const instructorsData = await instructorService.getInstructors({ thesis_round_id: selectedRound });
+          console.log('Instructors fetched:', instructorsData);
+          console.log('Number of instructors:', instructorsData?.length || 0);
+          const mappedInstructors = instructorsData.map((instructor: any) => ({
+            id: instructor.id,
+            instructorCode: instructor.instructor_code || '',
+            name: instructor.users?.full_name || 'Unknown',
+            degree: instructor.academic_title || instructor.degree || 'Giảng viên',
+            specialization: instructor.specialization || '',
+            currentLoad: instructor.instructor_assignments?.[0]?.current_load || 0,
+            quota: instructor.instructor_assignments?.[0]?.supervision_quota || 0,
+            department: instructor.departments_instructors_department_idTodepartments?.department_name || '',
+            email: instructor.users?.email || '',
+            phone: instructor.users?.phone || '',
+            yearsOfExperience: instructor.years_of_experience || 0,
+            avatar: instructor.users?.avatar || '',
+            status: instructor.status || true,
+          }));
+          console.log('Mapped instructors:', mappedInstructors);
+          setInstructors(mappedInstructors);
+          setFilteredInstructors(mappedInstructors);
+        } catch (e) {
+          console.error('Error fetching instructors:', e);
+          alert('Lỗi khi tải danh sách giảng viên: ' + (e as any).message);
+        }
+      } catch (error) {
+        console.error('Error fetching data for round:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstructorsForRound();
+  }, [selectedRound]);
 
   const steps = [
     { number: 1, title: 'Chọn GV hướng dẫn' },
@@ -144,8 +165,13 @@ export function TopicRegistration() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedInstructor || !selectedGroupId) {
-      alert('Vui lòng chọn giảng viên và nhóm');
+    if (!selectedInstructor) {
+      alert('Vui lòng chọn giảng viên');
+      return;
+    }
+
+    if (registrationMode === 'group' && !selectedGroupId) {
+      alert('Vui lòng chọn nhóm');
       return;
     }
 
@@ -169,16 +195,16 @@ export function TopicRegistration() {
       setSubmitting(true);
 
       const registrationData = {
-        thesis_group_id: selectedGroupId,
+        thesis_group_id: registrationMode === 'group' ? (selectedGroupId ?? undefined) : undefined,
         thesis_round_id: activeRound.id,
         instructor_id: selectedInstructor,
         proposed_topic_id: topicMode === 'proposed' ? selectedTopic ?? undefined : undefined,
         self_proposed_title: topicMode === 'self' ? selfProposedTitle : undefined,
         self_proposed_description: topicMode === 'self' ? selfProposedDescription : undefined,
         selection_reason: selectionReason,
-        applied_group_mode: 'GROUP' as const,
-        applied_min_members: 2,
-        applied_max_members: 4,
+        applied_group_mode: registrationMode === 'group' ? ('GROUP_ONLY' as const) : ('INDIVIDUAL_ONLY' as const),
+        applied_min_members: registrationMode === 'group' ? 2 : 1,
+        applied_max_members: registrationMode === 'group' ? 4 : 1,
         student_id: studentId,
       };
 
@@ -189,9 +215,11 @@ export function TopicRegistration() {
       setCurrentStep(1);
       setSelectedInstructor(null);
       setSelectedTopic(null);
+      setSelectedGroupId(null);
       setSelfProposedTitle('');
       setSelfProposedDescription('');
       setSelectionReason('');
+      setRegistrationMode('group');
     } catch (error: any) {
       console.error('Error submitting registration:', error);
       alert(`Lỗi đăng ký: ${error.message || 'Đã có lỗi xảy ra'}`);
@@ -246,20 +274,55 @@ export function TopicRegistration() {
       {currentStep === 1 && (
         <div>
           <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Tìm kiếm giảng viên..." 
-                  className="pl-10" 
-                  value={instructorSearch}
-                  onChange={handleInstructorSearch}
-                />
-              </div>
+            <CardContent className="p-6">
+              <label className="block text-sm font-medium mb-2">Chọn đợt khóa luận</label>
+              <select
+                className="w-full px-3 py-2 bg-background border border-input rounded-lg"
+                value={selectedRound || ''}
+                onChange={(e) => setSelectedRound(Number(e.target.value))}
+              >
+                <option value="">-- Chọn đợt khóa luận --</option>
+                {thesisRounds
+                  .filter((round: any) => round.status?.toUpperCase() === 'ACTIVE')
+                  .map((round: any) => (
+                    <option key={round.id} value={round.id}>
+                      {round.round_name || round.roundName || `Đợt ${round.id}`}
+                    </option>
+                  ))}
+              </select>
+              {!selectedRound && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Vui lòng chọn đợt khóa luận để xem danh sách giảng viên
+                </p>
+              )}
             </CardContent>
           </Card>
 
-          {loading ? (
+          {selectedRound && (
+            <Card className="mb-6">
+              <CardContent className="p-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Tìm kiếm giảng viên..."
+                    className="pl-10"
+                    value={instructorSearch}
+                    onChange={handleInstructorSearch}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!selectedRound ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-muted-foreground">
+                  Vui lòng chọn đợt khóa luận để xem danh sách giảng viên
+                </div>
+              </CardContent>
+            </Card>
+          ) : loading ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <div className="text-muted-foreground">Đang tải danh sách giảng viên...</div>
@@ -269,8 +332,8 @@ export function TopicRegistration() {
             <Card>
               <CardContent className="p-12 text-center">
                 <div className="text-muted-foreground">
-                  {instructors.length === 0 
-                    ? 'Không có giảng viên nào. Vui lòng kiểm tra lại đợt đồ án hoặc liên hệ quản trị viên.' 
+                  {instructors.length === 0
+                    ? 'Không có giảng viên nào cho đợt khóa luận này. Vui lòng liên hệ quản trị viên.'
                     : 'Không tìm thấy giảng viên phù hợp với tìm kiếm.'}
                 </div>
               </CardContent>
@@ -459,21 +522,51 @@ export function TopicRegistration() {
           <CardContent>
             <div className="space-y-6">
               <div className="p-4 bg-muted rounded-lg">
-                <h4 className="font-semibold mb-2">Nhóm</h4>
-                <select
-                  className="w-full px-3 py-2 bg-background border border-input rounded-lg"
-                  value={selectedGroupId || ''}
-                  onChange={(e) => setSelectedGroupId(Number(e.target.value))}
-                  required
-                >
-                  <option value="">Chọn nhóm</option>
-                  {thesisGroups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.group_name} ({group.thesis_group_members?.length || 0} thành viên)
-                    </option>
-                  ))}
-                </select>
+                <h4 className="font-semibold mb-3">Hình thức đăng ký</h4>
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="registrationMode"
+                      value="group"
+                      checked={registrationMode === 'group'}
+                      onChange={(e) => setRegistrationMode(e.target.value as 'group' | 'individual')}
+                      className="w-4 h-4"
+                    />
+                    <span>Nhóm</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="registrationMode"
+                      value="individual"
+                      checked={registrationMode === 'individual'}
+                      onChange={(e) => setRegistrationMode(e.target.value as 'group' | 'individual')}
+                      className="w-4 h-4"
+                    />
+                    <span>Cá nhân</span>
+                  </label>
+                </div>
               </div>
+
+              {registrationMode === 'group' && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <h4 className="font-semibold mb-2">Nhóm</h4>
+                  <select
+                    className="w-full px-3 py-2 bg-background border border-input rounded-lg"
+                    value={selectedGroupId || ''}
+                    onChange={(e) => setSelectedGroupId(Number(e.target.value))}
+                    required
+                  >
+                    <option value="">Chọn nhóm</option>
+                    {thesisGroups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.group_name} ({group.thesis_group_members?.length || 0} thành viên)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="p-4 bg-muted rounded-lg">
                 <h4 className="font-semibold mb-2">Giảng viên hướng dẫn</h4>

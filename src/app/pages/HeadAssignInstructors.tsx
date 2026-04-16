@@ -118,9 +118,7 @@ export function HeadAssignInstructors() {
         setIsFetchingInstructors(true);
         setError(null);
         try {
-          const data = await instructorService.getInstructors({
-            department_id: selectedRound.department_id,
-          });
+          const data = await instructorService.getInstructors();
           setInstructors(data);
         } catch (err: any) {
           setError(err.message || 'Không thể tải danh sách giáo viên');

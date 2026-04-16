@@ -60,7 +60,7 @@ export function ThesisRounds() {
     registration_deadline: '',
     faculty_id: 1, // Default value - should be fetched from user context
     department_id: 1, // Default value - should be fetched from user context
-    default_group_mode: 'BOTH' as 'INDIVIDUAL' | 'GROUP' | 'BOTH',
+    default_group_mode: 'BOTH' as 'INDIVIDUAL_ONLY' | 'GROUP_ONLY' | 'BOTH',
     default_min_members: 1,
     default_max_members: 4,
   });
@@ -94,7 +94,7 @@ export function ThesisRounds() {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
-      default_group_mode: e.target.value as 'INDIVIDUAL' | 'GROUP' | 'BOTH',
+      default_group_mode: e.target.value as 'INDIVIDUAL_ONLY' | 'GROUP_ONLY' | 'BOTH',
     }));
   };
 
@@ -491,8 +491,8 @@ export function ThesisRounds() {
                   <input
                     type="radio"
                     name="groupMode"
-                    value="INDIVIDUAL"
-                    checked={formData.default_group_mode === 'INDIVIDUAL'}
+                    value="INDIVIDUAL_ONLY"
+                    checked={formData.default_group_mode === 'INDIVIDUAL_ONLY'}
                     onChange={handleRadioChange}
                     className="w-4 h-4"
                   />
@@ -502,8 +502,8 @@ export function ThesisRounds() {
                   <input
                     type="radio"
                     name="groupMode"
-                    value="GROUP"
-                    checked={formData.default_group_mode === 'GROUP'}
+                    value="GROUP_ONLY"
+                    checked={formData.default_group_mode === 'GROUP_ONLY'}
                     onChange={handleRadioChange}
                     className="w-4 h-4"
                   />

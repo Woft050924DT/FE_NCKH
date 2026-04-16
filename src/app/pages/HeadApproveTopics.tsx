@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, CheckCircle, XCircle, Clock, Search, Filter } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, Clock, Search, Filter, X } from 'lucide-react';
 import { PageLayout } from '../components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import { Badge, getStatusBadgeVariant } from '../components/ui/Badge';
@@ -16,6 +16,10 @@ export function HeadApproveTopics() {
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchRegistrations = async () => {
@@ -39,20 +43,69 @@ export function HeadApproveTopics() {
   }, []);
 
   const handleApprove = async (id: number, approved: boolean) => {
+    if (approved) {
+      // Direct approve
+      try {
+        setIsSubmitting(true);
+        await topicRegistrationService.headApproveRegistration(id, {
+          status: 'APPROVED',
+          rejection_reason: '',
+        });
+        // Refresh list
+        const data = await topicRegistrationService.getTopicRegistrations();
+        const pendingHeadApprovals = data.filter((r: any) =>
+          r.instructor_status === 'APPROVED' && r.head_status === 'PENDING'
+        );
+        setRegistrations(pendingHeadApprovals);
+        alert('Đã duyệt đề tài thành công');
+      } catch (error) {
+        console.error('Error approving registration:', error);
+        alert('Có lỗi xảy ra khi duyệt đề tài');
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // Open reject modal
+      setSelectedRegistration(registrations.find((r: any) => r.id === id));
+      setRejectionReason('');
+      setIsRejectModalOpen(true);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!selectedRegistration || !rejectionReason.trim()) {
+      alert('Vui lòng nhập lý do từ chối');
+      return;
+    }
+
     try {
-      await topicRegistrationService.headApproveRegistration(id, {
-        status: approved ? 'APPROVED' : 'REJECTED',
-        rejection_reason: approved ? undefined : 'Không phù hợp',
+      setIsSubmitting(true);
+      await topicRegistrationService.headApproveRegistration(selectedRegistration.id, {
+        status: 'REJECTED',
+        rejection_reason: rejectionReason,
       });
       // Refresh list
       const data = await topicRegistrationService.getTopicRegistrations();
-      const pendingHeadApprovals = data.filter((r: any) => 
+      const pendingHeadApprovals = data.filter((r: any) =>
         r.instructor_status === 'APPROVED' && r.head_status === 'PENDING'
       );
       setRegistrations(pendingHeadApprovals);
+      setIsRejectModalOpen(false);
+      setRejectionReason('');
+      setSelectedRegistration(null);
+      alert('Đã từ chối đề tài');
     } catch (error) {
-      console.error('Error approving registration:', error);
+      console.error('Error rejecting registration:', error);
+      alert('Có lỗi xảy ra khi từ chối đề tài');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleRejectCancel = () => {
+    setIsRejectModalOpen(false);
+    setRejectionReason('');
+    setSelectedRegistration(null);
   };
 
   return (
@@ -160,18 +213,20 @@ export function HeadApproveTopics() {
                         size="sm"
                         onClick={() => handleApprove(reg.id, true)}
                         className="flex-1"
+                        disabled={isSubmitting}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Duyệt
+                        {isSubmitting ? 'Đang xử lý...' : 'Duyệt'}
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleApprove(reg.id, false)}
                         className="flex-1"
+                        disabled={isSubmitting}
                       >
                         <XCircle className="w-4 h-4 mr-2" />
-                        Từ chối
+                        {isSubmitting ? 'Đang xử lý...' : 'Từ chối'}
                       </Button>
                     </div>
                   )}
@@ -181,6 +236,39 @@ export function HeadApproveTopics() {
           )}
         </CardContent>
       </Card>
+
+      {/* Reject Modal */}
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold">Từ chối đề tài</h2>
+              <Button variant="ghost" size="sm" onClick={handleRejectCancel}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Lý do từ chối:</label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Nhập lý do từ chối..."
+                  className="w-full min-h-[120px] px-3 py-2 border border-input rounded-md resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <Button variant="outline" onClick={handleRejectCancel} disabled={isSubmitting}>
+                Hủy
+              </Button>
+              <Button variant="destructive" onClick={handleRejectConfirm} disabled={isSubmitting || !rejectionReason.trim()}>
+                {isSubmitting ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 }

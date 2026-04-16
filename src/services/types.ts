@@ -203,12 +203,32 @@ export interface TopicRegistration {
   instructor_id: number;
   proposed_topic_id?: number;
   self_proposed_title?: string;
+  self_proposed_description?: string;
   instructor_status: Status;
-  head_status: Status;
+  head_status: Status | null;
   registration_date: string;
+  instructor_rejection_reason?: string;
+  instructor_approval_date?: string;
+  head_rejection_reason?: string;
+  head_approval_date?: string;
+  head_override_group_mode?: GroupMode;
+  head_override_min_members?: number;
+  head_override_max_members?: number;
+  head_override_reason?: string;
   proposed_topics?: ProposedTopic;
   thesis_groups?: ThesisGroup;
   thesis_rounds?: ThesisRound;
+  instructors?: {
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+      email: string;
+    };
+    departments?: {
+      department_name: string;
+    };
+  };
 }
 
 export interface ApproveRegistrationRequest {

@@ -87,4 +87,12 @@ export const topicRegistrationService = {
   ): Promise<TopicRegistration> {
     return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/head-approve`, data, false);
   },
+
+  /**
+   * Get pending registrations for department head
+   * GET /api/topic-registrations/pending/head
+   */
+  async getPendingRegistrationsForHead(departmentId: number): Promise<TopicRegistration[]> {
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending/head?department_id=${departmentId}`, false);
+  },
 };

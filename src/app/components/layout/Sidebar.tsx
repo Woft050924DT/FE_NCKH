@@ -23,6 +23,7 @@ const menuItems = {
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: FileText, label: 'Đề tài của tôi', path: '/my-topics' },
     { icon: Users, label: 'Sinh viên hướng dẫn', path: '/students' },
+    { icon: ClipboardList, label: 'Báo cáo', path: '/reports' },
     { icon: CheckSquare, label: 'Lịch phản biện', path: '/reviews' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
   ],

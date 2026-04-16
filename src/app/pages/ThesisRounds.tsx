@@ -15,6 +15,8 @@ export function ThesisRounds() {
   const { user } = useAuth();
   const userRole = user?.role || 'head';
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRound, setSelectedRound] = useState<ThesisRound | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingRounds, setIsFetchingRounds] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,19 +52,36 @@ export function ThesisRounds() {
 
   // Form state
   const [formData, setFormData] = useState({
-    round_code: '',
-    round_name: '',
-    thesis_type_id: 1,
+    roundCode: '',
+    roundName: '',
+    thesisTypeId: 1,
     semester: 1,
-    academic_year: '',
-    start_date: '',
-    end_date: '',
-    registration_deadline: '',
-    faculty_id: 1, // Default value - should be fetched from user context
-    department_id: 1, // Default value - should be fetched from user context
-    default_group_mode: 'BOTH' as 'INDIVIDUAL_ONLY' | 'GROUP_ONLY' | 'BOTH',
-    default_min_members: 1,
-    default_max_members: 4,
+    academicYear: '',
+    startDate: '',
+    endDate: '',
+    topicProposalDeadline: '',
+    registrationDeadline: '',
+    reportSubmissionDeadline: '',
+    notes: '',
+    facultyId: 1, // Default value - should be fetched from user context
+    departmentId: 1, // Default value - should be fetched from user context
+  });
+
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    roundCode: '',
+    roundName: '',
+    thesisTypeId: 1,
+    semester: 1,
+    academicYear: '',
+    startDate: '',
+    endDate: '',
+    topicProposalDeadline: '',
+    registrationDeadline: '',
+    reportSubmissionDeadline: '',
+    notes: '',
+    facultyId: 1,
+    departmentId: 1,
   });
 
   // Fetch thesis rounds on component mount
@@ -87,15 +106,70 @@ export function ThesisRounds() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'semester' || name === 'thesis_type_id' || name === 'default_min_members' || name === 'default_max_members' || name === 'faculty_id' || name === 'department_id' ? Number(value) : value,
+      [name]: name === 'semester' || name === 'thesisTypeId' || name === 'facultyId' || name === 'departmentId' ? Number(value) : value,
     }));
   };
 
-  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
       ...prev,
-      default_group_mode: e.target.value as 'INDIVIDUAL_ONLY' | 'GROUP_ONLY' | 'BOTH',
+      [name]: name === 'semester' || name === 'thesisTypeId' || name === 'facultyId' || name === 'departmentId' ? Number(value) : value,
     }));
+  };
+
+  const handleOpenEditModal = (round: ThesisRound) => {
+    setSelectedRound(round);
+    setEditFormData({
+      roundCode: round.round_code || '',
+      roundName: round.round_name || '',
+      thesisTypeId: round.thesis_type_id || 1,
+      semester: typeof round.semester === 'string' ? parseInt(round.semester) : round.semester || 1,
+      academicYear: round.academic_year || '',
+      startDate: round.start_date ? round.start_date.split('T')[0] : '',
+      endDate: round.end_date ? round.end_date.split('T')[0] : '',
+      topicProposalDeadline: round.topic_proposal_deadline ? round.topic_proposal_deadline.split('T')[0] : '',
+      registrationDeadline: round.registration_deadline ? round.registration_deadline.split('T')[0] : '',
+      reportSubmissionDeadline: round.report_submission_deadline ? round.report_submission_deadline.split('T')[0] : '',
+      notes: round.notes || '',
+      facultyId: round.faculty_id || 1,
+      departmentId: round.department_id || 1,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRound) return;
+
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      await thesisRoundsService.updateThesisRoundForHead(selectedRound.id, editFormData);
+
+      setSuccessMessage('Cập nhật đợt khóa luận thành công!');
+      setIsEditModalOpen(false);
+
+      // Refresh rounds list
+      const fetchRounds = async () => {
+        setIsFetchingRounds(true);
+        try {
+          const data = await thesisRoundsService.getThesisRoundsForHead();
+          setRounds(handleRoundsResponse(data));
+        } catch (err: any) {
+          console.error('Error refreshing rounds:', err);
+        } finally {
+          setIsFetchingRounds(false);
+        }
+      };
+      fetchRounds();
+    } catch (err: any) {
+      setError(err.message || 'Có lỗi xảy ra khi cập nhật đợt khóa luận');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleActivateRound = async (id: number) => {
@@ -156,19 +230,19 @@ export function ThesisRounds() {
       setIsCreateModalOpen(false);
       // Reset form
       setFormData({
-        round_code: '',
-        round_name: '',
-        thesis_type_id: 1,
+        roundCode: '',
+        roundName: '',
+        thesisTypeId: 1,
         semester: 1,
-        academic_year: '',
-        start_date: '',
-        end_date: '',
-        registration_deadline: '',
-        faculty_id: 1,
-        department_id: 1,
-        default_group_mode: 'BOTH',
-        default_min_members: 1,
-        default_max_members: 4,
+        academicYear: '',
+        startDate: '',
+        endDate: '',
+        topicProposalDeadline: '',
+        registrationDeadline: '',
+        reportSubmissionDeadline: '',
+        notes: '',
+        facultyId: 1,
+        departmentId: 1,
       });
       // Refresh the rounds list
       const fetchRounds = async () => {
@@ -301,7 +375,7 @@ export function ThesisRounds() {
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button size="sm" variant="ghost">Xem</Button>
-                          <Button size="sm" variant="ghost">Sửa</Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleOpenEditModal(round)}>Sửa</Button>
                           {round.status === 'Preparing' && (
                             <Button
                               size="sm"
@@ -311,7 +385,7 @@ export function ThesisRounds() {
                               Kích hoạt
                             </Button>
                           )}
-                          {round.status === 'Active' && (
+                          {round.status === 'ACTIVE' && (
                             <Button
                               size="sm"
                               variant="default"
@@ -360,8 +434,8 @@ export function ThesisRounds() {
                   Mã đợt khóa luận <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  name="round_code"
-                  value={formData.round_code}
+                  name="roundCode"
+                  value={formData.roundCode}
                   onChange={handleInputChange}
                   placeholder="VD: DOT1-2024-2025"
                   required
@@ -372,8 +446,8 @@ export function ThesisRounds() {
                   Tên đợt khóa luận <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  name="round_name"
-                  value={formData.round_name}
+                  name="roundName"
+                  value={formData.roundName}
                   onChange={handleInputChange}
                   placeholder="VD: Khóa luận tốt nghiệp Học kỳ 1"
                   required
@@ -384,8 +458,8 @@ export function ThesisRounds() {
                   Loại khóa luận <span className="text-destructive">*</span>
                 </label>
                 <select
-                  name="thesis_type_id"
-                  value={formData.thesis_type_id}
+                  name="thesisTypeId"
+                  value={formData.thesisTypeId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   required
@@ -401,8 +475,8 @@ export function ThesisRounds() {
                     Năm học <span className="text-destructive">*</span>
                   </label>
                   <select
-                    name="academic_year"
-                    value={formData.academic_year}
+                    name="academicYear"
+                    value={formData.academicYear}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                     required
@@ -443,9 +517,9 @@ export function ThesisRounds() {
                   Ngày bắt đầu <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  name="start_date"
+                  name="startDate"
                   type="date"
-                  value={formData.start_date}
+                  value={formData.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -455,9 +529,35 @@ export function ThesisRounds() {
                   Ngày kết thúc <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  name="end_date"
+                  name="endDate"
                   type="date"
-                  value={formData.end_date}
+                  value={formData.endDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đề xuất đề tài <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="topicProposalDeadline"
+                  type="date"
+                  value={formData.topicProposalDeadline}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đăng ký <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="registrationDeadline"
+                  type="date"
+                  value={formData.registrationDeadline}
                   onChange={handleInputChange}
                   required
                 />
@@ -466,87 +566,27 @@ export function ThesisRounds() {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Hạn đăng ký <span className="text-destructive">*</span>
+                  Hạn nộp báo cáo <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  name="registration_deadline"
+                  name="reportSubmissionDeadline"
                   type="date"
-                  value={formData.registration_deadline}
+                  value={formData.reportSubmissionDeadline}
                   onChange={handleInputChange}
                   required
                 />
               </div>
             </div>
-          </div>
-
-          {/* Quy tắc nhóm */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg text-foreground">Quy tắc nhóm</h3>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Chế độ nhóm
-              </label>
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="groupMode"
-                    value="INDIVIDUAL_ONLY"
-                    checked={formData.default_group_mode === 'INDIVIDUAL_ONLY'}
-                    onChange={handleRadioChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">Cá nhân</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="groupMode"
-                    value="GROUP_ONLY"
-                    checked={formData.default_group_mode === 'GROUP_ONLY'}
-                    onChange={handleRadioChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">Nhóm</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="groupMode"
-                    value="BOTH"
-                    checked={formData.default_group_mode === 'BOTH'}
-                    onChange={handleRadioChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">Cả hai</span>
-                </label>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Số thành viên tối thiểu
+                  Ghi chú
                 </label>
                 <Input
-                  name="default_min_members"
-                  type="number"
-                  value={formData.default_min_members}
+                  name="notes"
+                  value={formData.notes}
                   onChange={handleInputChange}
-                  min="1"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Số thành viên tối đa
-                </label>
-                <Input
-                  name="default_max_members"
-                  type="number"
-                  value={formData.default_max_members}
-                  onChange={handleInputChange}
-                  min="1"
-                  required
+                  placeholder="Ghi chú về đợt khóa luận..."
                 />
               </div>
             </div>
@@ -564,6 +604,143 @@ export function ThesisRounds() {
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Đang tạo...' : 'Tạo đợt khóa luận'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Chỉnh sửa đợt khóa luận"
+        size="lg"
+      >
+        <form onSubmit={handleUpdateSubmit} className="space-y-6">
+          {/* Thông tin cơ bản */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-foreground">Thông tin cơ bản</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Mã đợt khóa luận
+                </label>
+                <Input
+                  name="roundCode"
+                  value={editFormData.roundCode}
+                  onChange={handleEditInputChange}
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Tên đợt khóa luận <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="roundName"
+                  value={editFormData.roundName}
+                  onChange={handleEditInputChange}
+                  placeholder="VD: Khóa luận tốt nghiệp Học kỳ 1"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Thời gian */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-foreground">Thời gian</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Ngày bắt đầu <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="startDate"
+                  type="date"
+                  value={editFormData.startDate}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Ngày kết thúc <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="endDate"
+                  type="date"
+                  value={editFormData.endDate}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đăng ký <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="registrationDeadline"
+                  type="date"
+                  value={editFormData.registrationDeadline}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn đề xuất đề tài
+                </label>
+                <Input
+                  name="topicProposalDeadline"
+                  type="date"
+                  value={editFormData.topicProposalDeadline}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Hạn nộp báo cáo
+                </label>
+                <Input
+                  name="reportSubmissionDeadline"
+                  type="date"
+                  value={editFormData.reportSubmissionDeadline}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Ghi chú
+                </label>
+                <Input
+                  name="notes"
+                  value={editFormData.notes}
+                  onChange={handleEditInputChange}
+                  placeholder="Ghi chú về đợt khóa luận..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              disabled={isLoading}
+            >
+              Hủy
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Đang cập nhật...' : 'Cập nhật đợt khóa luận'}
             </Button>
           </div>
         </form>

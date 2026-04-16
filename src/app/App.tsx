@@ -19,6 +19,8 @@ import { WeeklyReports } from './pages/WeeklyReports';
 import { Scores } from './pages/Scores';
 import { MyTopics } from './pages/MyTopic';
 import { MyStudents } from './pages/MyStudents';
+import { InstructorReports } from './pages/InstructorReports';
+import { InstructorAllReports } from './pages/InstructorAllReports';
 import { ReviewSchedule } from './pages/ReviewSchedule';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
@@ -104,6 +106,7 @@ function AppRoutes() {
       <Route path="/reports" element={
         <ProtectedRoute>
           {userRole === 'student' && <WeeklyReports />}
+          {userRole === 'instructor' && <InstructorAllReports />}
           {(userRole === 'head' || userRole === 'department_head') && <HeadReports />}
         </ProtectedRoute>
       } />
@@ -120,6 +123,11 @@ function AppRoutes() {
       <Route path="/students" element={
         <ProtectedRoute>
           {userRole === 'instructor' && <MyStudents />}
+        </ProtectedRoute>
+      } />
+      <Route path="/students/:thesisId/reports" element={
+        <ProtectedRoute>
+          {userRole === 'instructor' && <InstructorReports />}
         </ProtectedRoute>
       } />
       <Route path="/reviews" element={

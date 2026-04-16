@@ -57,47 +57,109 @@ export interface LogoutResponse {
 
 // Thesis Rounds Types
 export interface CreateThesisRoundRequest {
-  semester: string;
-  round_name: string;
-  start_date: string;
-  end_date: string;
-  registration_deadline: string;
-  faculty_id: number;
-  department_id: number;
-  default_group_mode: GroupMode;
-  default_min_members: number;
-  default_max_members: number;
+  roundCode: string;
+  roundName: string;
+  thesisTypeId: number;
+  departmentId: number;
+  facultyId: number;
+  academicYear: string;
+  semester: number;
+  startDate: string;
+  endDate: string;
+  topicProposalDeadline: string;
+  registrationDeadline: string;
+  reportSubmissionDeadline: string;
+  notes?: string;
 }
 
 export interface ThesisRound {
   id: number;
-  semester: string;
+  round_code: string;
   round_name: string;
+  thesis_type_id: number;
+  department_id: number;
+  faculty_id: number;
+  academic_year: string;
+  semester: number;
   start_date: string;
   end_date: string;
+  topic_proposal_deadline: string;
   registration_deadline: string;
-  status: Status;
-  faculty_id?: number;
-  department_id?: number;
+  report_submission_deadline: string;
+  notes?: string;
+  status: 'Preparing' | 'Open' | 'In Progress' | 'Closed' | 'Completed' | 'ACTIVE';
+  created_at: string;
+  updated_at: string;
   thesis_round_rules?: {
+    id: number;
+    thesis_round_id: number;
     default_group_mode: GroupMode;
     default_min_members: number;
     default_max_members: number;
   };
   faculties?: {
     id: number;
+    faculty_code: string;
     faculty_name: string;
   };
   departments?: {
     id: number;
+    department_code: string;
     department_name: string;
   };
+  instructor_assignments?: InstructorAssignment[];
+  thesis_round_classes?: ThesisRoundClass[];
+  guidance_processes?: GuidanceProcess[];
 }
 
 export interface InstructorAssignment {
+  id: number;
+  thesis_round_id: number;
   instructor_id: number;
-  quota: number;
+  supervision_quota: number;
+  current_load: number;
   notes?: string;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  instructors?: {
+    id: number;
+    instructor_code: string;
+    users?: {
+      id: number;
+      full_name: string;
+      email: string;
+      phone?: string;
+      avatar?: string;
+    };
+    departments_instructors_department_idTodepartments?: {
+      id: number;
+      department_code: string;
+      department_name: string;
+    };
+  };
+}
+
+export interface ThesisRoundClass {
+  id: number;
+  thesis_round_id: number;
+  class_id: number;
+  classes?: {
+    id: number;
+    class_code: string;
+    class_name: string;
+  };
+}
+
+export interface GuidanceProcess {
+  id: number;
+  thesis_round_id: number;
+  week_number: number;
+  phase_name: string;
+  work_description: string;
+  expected_outcome: string;
+  status: boolean;
+  created_at: string;
 }
 
 export interface AssignedInstructor {
@@ -109,25 +171,48 @@ export interface AssignedInstructor {
   notes?: string;
 }
 
-export interface AssignClassesRequest {
-  class_ids: number[];
-}
-
 export interface AssignedClass {
   id: number;
   thesis_round_id: number;
   class_id: number;
 }
 
-export interface GuidanceProcess {
-  week_number: number;
-  phase_name: string;
-  work_description: string;
-  expected_outcome: string;
+export interface UpdateThesisRoundStatusRequest {
+  status: 'Open' | 'Closed' | 'In Progress' | 'Completed';
+}
+
+export interface UpdateThesisRoundRequest {
+  roundCode?: string;
+  roundName?: string;
+  thesisTypeId?: number;
+  semester?: number;
+  academicYear?: string;
+  startDate?: string;
+  endDate?: string;
+  topicProposalDeadline?: string;
+  registrationDeadline?: string;
+  reportSubmissionDeadline?: string;
+  notes?: string;
+  facultyId?: number;
+  departmentId?: number;
+}
+
+export interface AssignInstructorsRequest {
+  instructorIds: number[];
+  supervisionQuota: number;
+}
+
+export interface AssignClassesRequest {
+  class_ids: number[];
 }
 
 export interface AddGuidanceProcessRequest {
-  processes: GuidanceProcess[];
+  processes: {
+    week_number: number;
+    phase_name: string;
+    work_description: string;
+    expected_outcome: string;
+  }[];
 }
 
 export interface GuidanceProcessResponse {
@@ -460,14 +545,38 @@ export interface WeeklyReport {
   id: number;
   thesis_id: number;
   week_number: number;
-  report_content: string;
-  progress_percentage: number;
-  challenges: string;
-  next_plan: string;
-  submission_date: string;
+  report_date: string;
+  work_completed: string;
+  results_achieved: string;
+  difficulties_encountered: string;
+  next_week_plan: string;
+  attachment_file?: string;
+  submitted_by: number;
+  student_status: 'SUBMITTED';
+  instructor_status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEED_CHANGES';
   instructor_feedback?: string;
-  review_score?: number;
-  review_status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
+  weekly_score?: number;
+  feedback_date?: string;
+  weekly_report_individual_contributions?: WeeklyReportIndividualContribution[];
+}
+
+export interface WeeklyReportIndividualContribution {
+  id: number;
+  weekly_report_id: number;
+  student_id: number;
+  individual_work: string;
+  individual_results: string;
+  hours_spent: number;
+  self_evaluation: string;
+  students?: {
+    id: number;
+    student_code: string;
+    users: {
+      id: number;
+      full_name: string;
+      email: string;
+    };
+  };
 }
 
 export interface AddContributionRequest {
@@ -485,6 +594,31 @@ export interface WeeklyReportContribution {
   contribution_description: string;
   hours_spent: number;
   tasks_completed: string;
+}
+
+export interface SubmitWeeklyReportRequest {
+  weekNumber: number;
+  workCompleted: string;
+  resultsAchieved: string;
+  difficultiesEncountered: string;
+  nextWeekPlan: string;
+  attachmentFile?: string;
+  studentId: number;
+  contributions?: IndividualContribution[];
+}
+
+export interface IndividualContribution {
+  studentId: number;
+  individualWork: string;
+  individualResults: string;
+  hoursSpent: number;
+  selfEvaluation: string;
+}
+
+export interface WeeklyReportFeedbackRequest {
+  instructorStatus: 'APPROVED' | 'REJECTED' | 'NEED_CHANGES';
+  instructorFeedback?: string;
+  weeklyScore?: number;
 }
 
 export interface SubmitFinalReportRequest {
@@ -610,4 +744,11 @@ export interface ErrorResponse {
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
+}
+
+// Standard API Response with success and message fields
+export interface StandardResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
 }

@@ -8,27 +8,57 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
-import { reportService } from '../../services';
+import { reportService, thesisRoundsService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function WeeklyReports() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [reportForm, setReportForm] = useState({
-    week_number: '',
-    report_content: '',
-    achievements: '',
-    challenges: '',
-    next_week_plan: '',
+    weekNumber: '',
+    workCompleted: '',
+    resultsAchieved: '',
+    difficultiesEncountered: '',
+    nextWeekPlan: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thesisId, setThesisId] = useState<number>(1); // Should come from context or API
+  const [thesisRounds, setThesisRounds] = useState<any[]>([]);
+  const [selectedRound, setSelectedRound] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchThesisRounds = async () => {
+      try {
+        const response = await thesisRoundsService.getThesisRoundsForStudent();
+        const rounds = response.success ? response.data : [];
+        setThesisRounds(rounds);
+        
+        // Auto-select the first active round if available
+        if (rounds.length > 0 && !selectedRound) {
+          setSelectedRound(rounds[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching thesis rounds:', error);
+      }
+    };
+
+    fetchThesisRounds();
+  }, []);
 
   useEffect(() => {
     const fetchReports = async () => {
+      if (!selectedRound) {
+        setReports([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const data = await reportService.getWeeklyReports();
-        setReports(data || []);
+        const response = await reportService.getThesisWeeklyReports(thesisId);
+        setReports(response.data || []);
       } catch (error) {
         console.error('Error fetching reports:', error);
       } finally {
@@ -37,33 +67,33 @@ export function WeeklyReports() {
     };
 
     fetchReports();
-  }, []);
+  }, [thesisId, selectedRound]);
 
   const handleSubmitReport = async () => {
     try {
       setIsSubmitting(true);
-      const thesisId = 1; // Should come from context or API
       
-      await reportService.createWeeklyReport({
-        thesis_id: thesisId,
-        week_number: parseInt(reportForm.week_number),
-        report_content: reportForm.report_content,
-        achievements: reportForm.achievements,
-        challenges: reportForm.challenges,
-        next_week_plan: reportForm.next_week_plan,
+      await reportService.submitWeeklyReport(thesisId, {
+        weekNumber: parseInt(reportForm.weekNumber),
+        workCompleted: reportForm.workCompleted,
+        resultsAchieved: reportForm.resultsAchieved,
+        difficultiesEncountered: reportForm.difficultiesEncountered,
+        nextWeekPlan: reportForm.nextWeekPlan,
+        studentId: user?.studentId || 1,
+        contributions: [],
       });
 
       // Refresh reports
-      const data = await reportService.getWeeklyReports();
-      setReports(data || []);
+      const response = await reportService.getThesisWeeklyReports(thesisId);
+      setReports(response.data || []);
 
       // Reset form and close dialog
       setReportForm({
-        week_number: '',
-        report_content: '',
-        achievements: '',
-        challenges: '',
-        next_week_plan: '',
+        weekNumber: '',
+        workCompleted: '',
+        resultsAchieved: '',
+        difficultiesEncountered: '',
+        nextWeekPlan: '',
       });
       setIsDialogOpen(false);
     } catch (error) {
@@ -101,14 +131,36 @@ export function WeeklyReports() {
       title="Báo cáo tuần"
       subtitle="Quản lý và theo dõi báo cáo tiến độ tuần"
       actions={
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo báo cáo mới
-        </Button>
+        <div className="flex items-center gap-4">
+          <select
+            className="px-3 py-2 bg-background border border-input rounded-lg"
+            value={selectedRound || ''}
+            onChange={(e) => setSelectedRound(Number(e.target.value))}
+          >
+            <option value="">-- Chọn đợt khóa luận --</option>
+            {thesisRounds.map((round) => (
+              <option key={round.id} value={round.id}>
+                {round.round_name || round.semester || `Đợt ${round.id}`}
+              </option>
+            ))}
+          </select>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Tạo báo cáo mới
+          </Button>
+        </div>
       }
     >
       <div className="grid grid-cols-1 gap-6">
-        {reports.length === 0 ? (
+        {!selectedRound ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Vui lòng chọn đợt khóa luận</h3>
+              <p className="text-muted-foreground">Chọn một đợt khóa luận để xem báo cáo tuần</p>
+            </CardContent>
+          </Card>
+        ) : reports.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
@@ -128,11 +180,13 @@ export function WeeklyReports() {
                   <div>
                     <CardTitle>Báo cáo tuần {report.week_number}</CardTitle>
                     <CardDescription>
-                      Nộp ngày: {new Date(report.submission_date).toLocaleDateString('vi-VN')}
+                      Nộp ngày: {new Date(report.report_date).toLocaleDateString('vi-VN')}
                     </CardDescription>
                   </div>
-                  <Badge variant={getStatusBadgeVariant(report.review_status)}>
-                    {report.review_status === 'APPROVED' ? 'Đã duyệt' : report.review_status}
+                  <Badge variant={getStatusBadgeVariant(report.instructor_status)}>
+                    {report.instructor_status === 'APPROVED' ? 'Đã duyệt' : 
+                     report.instructor_status === 'PENDING' ? 'Chờ đánh giá' :
+                     report.instructor_status === 'REJECTED' ? 'Bị từ chối' : 'Cần sửa đổi'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -141,26 +195,26 @@ export function WeeklyReports() {
                   <div>
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      Nội dung công việc
+                      Công việc đã hoàn thành
                     </h4>
-                    <p className="text-sm text-muted-foreground">{report.report_content}</p>
+                    <p className="text-sm text-muted-foreground">{report.work_completed}</p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                       <h4 className="font-medium mb-2 flex items-center gap-2 text-green-800">
                         <CheckCircle2 className="w-4 h-4" />
-                        Thành tựu
+                        Kết quả đạt được
                       </h4>
-                      <p className="text-sm text-green-700">{report.achievements}</p>
+                      <p className="text-sm text-green-700">{report.results_achieved}</p>
                     </div>
                     
                     <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
                       <h4 className="font-medium mb-2 flex items-center gap-2 text-amber-800">
                         <AlertCircle className="w-4 h-4" />
-                        Khó khăn
+                        Khó khăn gặp phải
                       </h4>
-                      <p className="text-sm text-amber-700">{report.challenges}</p>
+                      <p className="text-sm text-amber-700">{report.difficulties_encountered}</p>
                     </div>
                   </div>
 
@@ -176,6 +230,9 @@ export function WeeklyReports() {
                     <div className="p-4 bg-muted rounded-lg border">
                       <h4 className="font-medium mb-2">Nhận xét giảng viên</h4>
                       <p className="text-sm text-muted-foreground">{report.instructor_feedback}</p>
+                      {report.weekly_score && (
+                        <p className="text-sm font-semibold mt-2">Điểm: {report.weekly_score}/10</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -196,14 +253,14 @@ export function WeeklyReports() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="week_number" className="text-right">
+              <Label htmlFor="weekNumber" className="text-right">
                 Tuần thứ
               </Label>
               <Input
-                id="week_number"
+                id="weekNumber"
                 type="number"
-                value={reportForm.week_number}
-                onChange={(e) => setReportForm({ ...reportForm, week_number: e.target.value })}
+                value={reportForm.weekNumber}
+                onChange={(e) => setReportForm({ ...reportForm, weekNumber: e.target.value })}
                 className="col-span-3"
                 placeholder="1"
                 min="1"
@@ -211,52 +268,52 @@ export function WeeklyReports() {
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="report_content" className="text-right pt-2">
-                Nội dung
+              <Label htmlFor="workCompleted" className="text-right pt-2">
+                Công việc đã hoàn thành
               </Label>
               <Textarea
-                id="report_content"
-                value={reportForm.report_content}
-                onChange={(e) => setReportForm({ ...reportForm, report_content: e.target.value })}
+                id="workCompleted"
+                value={reportForm.workCompleted}
+                onChange={(e) => setReportForm({ ...reportForm, workCompleted: e.target.value })}
                 className="col-span-3"
                 placeholder="Mô tả công việc đã thực hiện..."
                 rows={3}
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="achievements" className="text-right pt-2">
-                Thành tựu
+              <Label htmlFor="resultsAchieved" className="text-right pt-2">
+                Kết quả đạt được
               </Label>
               <Textarea
-                id="achievements"
-                value={reportForm.achievements}
-                onChange={(e) => setReportForm({ ...reportForm, achievements: e.target.value })}
+                id="resultsAchieved"
+                value={reportForm.resultsAchieved}
+                onChange={(e) => setReportForm({ ...reportForm, resultsAchieved: e.target.value })}
                 className="col-span-3"
                 placeholder="Các kết quả đã đạt được..."
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="challenges" className="text-right pt-2">
-                Khó khăn
+              <Label htmlFor="difficultiesEncountered" className="text-right pt-2">
+                Khó khăn gặp phải
               </Label>
               <Textarea
-                id="challenges"
-                value={reportForm.challenges}
-                onChange={(e) => setReportForm({ ...reportForm, challenges: e.target.value })}
+                id="difficultiesEncountered"
+                value={reportForm.difficultiesEncountered}
+                onChange={(e) => setReportForm({ ...reportForm, difficultiesEncountered: e.target.value })}
                 className="col-span-3"
                 placeholder="Các vấn đề gặp phải..."
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="next_week_plan" className="text-right pt-2">
+              <Label htmlFor="nextWeekPlan" className="text-right pt-2">
                 Kế hoạch tuần sau
               </Label>
               <Textarea
-                id="next_week_plan"
-                value={reportForm.next_week_plan}
-                onChange={(e) => setReportForm({ ...reportForm, next_week_plan: e.target.value })}
+                id="nextWeekPlan"
+                value={reportForm.nextWeekPlan}
+                onChange={(e) => setReportForm({ ...reportForm, nextWeekPlan: e.target.value })}
                 className="col-span-3"
                 placeholder="Kế hoạch cho tuần tới..."
                 rows={2}

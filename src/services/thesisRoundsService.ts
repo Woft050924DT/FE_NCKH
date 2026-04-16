@@ -2,6 +2,8 @@ import { apiClient } from './apiClient';
 import type {
   CreateThesisRoundRequest,
   ThesisRound,
+  ThesisRoundClass,
+  GuidanceProcess,
   InstructorAssignment,
   AssignedInstructor,
   AssignClassesRequest,
@@ -9,6 +11,7 @@ import type {
   AddGuidanceProcessRequest,
   GuidanceProcessResponse,
   UpdateThesisRoundStatusRequest,
+  UpdateThesisRoundRequest,
   StandardResponse,
 } from './types';
 
@@ -67,14 +70,28 @@ export const thesisRoundsService = {
 
   /**
    * Update thesis round status (Department Head)
-   * PATCH /api/thesis-rounds/:roundId/status
+   * PATCH /api/department-head/thesis-rounds/:roundId/status
    */
   async updateThesisRoundStatus(
     roundId: number,
     data: UpdateThesisRoundStatusRequest
   ): Promise<StandardResponse<ThesisRound>> {
     return apiClient.patch<StandardResponse<ThesisRound>>(
-      `/api/thesis-rounds/${roundId}/status`,
+      `/api/department-head/thesis-rounds/${roundId}/status`,
+      data
+    );
+  },
+
+  /**
+   * Update thesis round (Department Head)
+   * PATCH /api/department-head/thesis-rounds/:roundId
+   */
+  async updateThesisRoundForHead(
+    roundId: number,
+    data: UpdateThesisRoundRequest
+  ): Promise<StandardResponse<ThesisRound>> {
+    return apiClient.patch<StandardResponse<ThesisRound>>(
+      `/api/department-head/thesis-rounds/${roundId}`,
       data
     );
   },
@@ -94,6 +111,20 @@ export const thesisRoundsService = {
   },
 
   /**
+   * Assign classes to a thesis round (Department Head)
+   * POST /api/department-head/thesis-rounds/:id/assign-classes
+   */
+  async assignClassesForHead(
+    id: number,
+    data: AssignClassesRequest
+  ): Promise<StandardResponse<ThesisRoundClass[]>> {
+    return apiClient.post<StandardResponse<ThesisRoundClass[]>>(
+      `/api/department-head/thesis-rounds/${id}/assign-classes`,
+      data
+    );
+  },
+
+  /**
    * Add guidance process to a thesis round (Admin only)
    * POST /api/admin/thesis-rounds/:id/guidance-process
    */
@@ -103,6 +134,20 @@ export const thesisRoundsService = {
   ): Promise<GuidanceProcessResponse[]> {
     return apiClient.post<GuidanceProcessResponse[]>(
       `/api/admin/thesis-rounds/${id}/guidance-process`,
+      data
+    );
+  },
+
+  /**
+   * Add guidance process to a thesis round (Department Head)
+   * POST /api/department-head/thesis-rounds/:id/guidance-process
+   */
+  async addGuidanceProcessForHead(
+    id: number,
+    data: AddGuidanceProcessRequest
+  ): Promise<StandardResponse<GuidanceProcess[]>> {
+    return apiClient.post<StandardResponse<GuidanceProcess[]>>(
+      `/api/department-head/thesis-rounds/${id}/guidance-process`,
       data
     );
   },
@@ -129,6 +174,32 @@ export const thesisRoundsService = {
    */
   async getThesisRoundsForHead(): Promise<ThesisRound[]> {
     return apiClient.get<ThesisRound[]>('/api/department-head/thesis-rounds');
+  },
+
+  /**
+   * Get active thesis rounds (Head of Department)
+   * GET /api/department-head/thesis-rounds/active
+   */
+  async getActiveThesisRoundsForHead(): Promise<StandardResponse<ThesisRound[]>> {
+    return apiClient.get<StandardResponse<ThesisRound[]>>('/api/department-head/thesis-rounds/active');
+  },
+
+  /**
+   * Get thesis round by ID (Head of Department)
+   * GET /api/department-head/thesis-rounds/:id
+   */
+  async getThesisRoundByIdForHead(id: number): Promise<StandardResponse<ThesisRound>> {
+    return apiClient.get<StandardResponse<ThesisRound>>(`/api/department-head/thesis-rounds/${id}`);
+  },
+
+  /**
+   * Get instructor assignments for a thesis round
+   * GET /api/department-head/thesis-rounds/:id/instructors
+   */
+  async getInstructorAssignments(id: number): Promise<StandardResponse<InstructorAssignment[]>> {
+    return apiClient.get<StandardResponse<InstructorAssignment[]>>(
+      `/api/department-head/thesis-rounds/${id}/instructors`
+    );
   },
 
   /**

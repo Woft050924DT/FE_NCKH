@@ -1,4 +1,5 @@
 import { Search, Eye, MessageSquare, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { PageLayout } from '../components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge, getStatusBadgeVariant } from '../components/ui/Badge';
@@ -10,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export function MyStudents() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const userRole = user?.role || 'instructor';
   const students = [
     {
@@ -215,7 +217,12 @@ export function MyStudents() {
                       <span className="text-sm text-muted-foreground">Điểm hướng dẫn</span>
                       <span className="text-xl font-bold text-green-600">{student.supervisionScore}</span>
                     </div>
-                    <Button variant="ghost" size="sm" className="w-full">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => navigate(`/students/${student.id}/reports`)}
+                    >
                       <FileText className="w-4 h-4" />
                       Xem báo cáo tuần
                     </Button>

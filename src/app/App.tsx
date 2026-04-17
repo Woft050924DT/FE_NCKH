@@ -5,6 +5,8 @@ import { StudentDashboard } from './pages/StudentDashboard';
 import { InstructorDashboard } from './pages/InstructorDashboard';
 import { HeadDashboard } from './pages/HeadDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminOrganizationManagement } from './pages/AdminOrganizationManagement';
+import { AdminUserManagement } from './pages/AdminUserManagement';
 import { GroupManagement } from './pages/GroupManagement';
 import { TopicRegistration } from './pages/TopicRegistration';
 import { HeadApproveTopics } from './pages/HeadApproveTopics';
@@ -159,12 +161,12 @@ function AppRoutes() {
       } />
       <Route path="/organization" element={
         <ProtectedRoute>
-          {userRole === 'admin' && <GroupManagement />}
+          {userRole === 'admin' && <AdminOrganizationManagement />}
         </ProtectedRoute>
       } />
       <Route path="/users" element={
         <ProtectedRoute>
-          {userRole === 'admin' && <GroupManagement />}
+          {userRole === 'admin' && <AdminUserManagement />}
         </ProtectedRoute>
       } />
       <Route path="/settings" element={

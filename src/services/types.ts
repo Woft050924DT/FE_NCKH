@@ -715,19 +715,39 @@ export interface DefenseResult {
 
 export interface DefenseSchedule {
   thesis_id: number;
+  thesis_code: string;
+  topic_title: string;
   defense_council?: {
+    id: number;
+    council_code: string;
     council_name: string;
     defense_date: string;
     start_time: string;
     end_time: string;
     venue: string;
+    status: CouncilStatus;
   };
   defense_assignment?: {
+    id: number;
     defense_order: number;
     defense_time: string;
     status: ReviewStatus;
   };
-  council_members?: CouncilMember[];
+  council_members?: CouncilMemberWithInstructor[];
+}
+
+export interface CouncilMemberWithInstructor {
+  id: number;
+  role: CouncilRole;
+  order_number: number;
+  instructors: {
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+      email: string;
+    };
+  };
 }
 
 export interface DefenseResults {
@@ -1026,4 +1046,208 @@ export interface ThesisMemberDetail {
 export interface DeleteCouncilResponse {
   message: string;
   data: Council;
+}
+
+// Organization Management Types
+export interface Faculty {
+  id: number;
+  faculty_code: string;
+  faculty_name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  dean_id?: number;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  departments?: Department[];
+}
+
+export interface CreateFacultyRequest {
+  faculty_code: string;
+  faculty_name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  dean_id?: number;
+}
+
+export interface UpdateFacultyRequest {
+  faculty_name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  dean_id?: number;
+  status?: boolean;
+}
+
+export interface Department {
+  id: number;
+  department_code: string;
+  department_name: string;
+  description?: string;
+  faculty_id: number;
+  head_id?: number;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  faculties?: {
+    id: number;
+    faculty_code: string;
+    faculty_name: string;
+  };
+  instructors_departments_head_idToinstructors?: {
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  };
+  instructors?: Array<{
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  }>;
+  majors?: any[];
+}
+
+export interface CreateDepartmentRequest {
+  department_code: string;
+  department_name: string;
+  description?: string;
+  faculty_id: number;
+  head_id?: number;
+}
+
+export interface UpdateDepartmentRequest {
+  department_name?: string;
+  description?: string;
+  head_id?: number;
+  status?: boolean;
+}
+
+export interface Class {
+  id: number;
+  class_code: string;
+  class_name: string;
+  major_id: number;
+  academic_year?: string;
+  student_count: number;
+  advisor_id?: number;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  majors?: {
+    id: number;
+    major_code: string;
+    major_name: string;
+    departments?: {
+      id: number;
+      department_code: string;
+      department_name: string;
+    };
+  };
+  instructors?: {
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  };
+  students?: Array<{
+    id: number;
+    student_code: string;
+    users: {
+      full_name: string;
+    };
+  }>;
+}
+
+export interface CreateClassRequest {
+  class_code: string;
+  class_name: string;
+  major_id: number;
+  academic_year?: string;
+  advisor_id?: number;
+}
+
+export interface UpdateClassRequest {
+  class_name?: string;
+  advisor_id?: number;
+  status?: boolean;
+}
+
+// User Management Types
+export interface UserManagement {
+  id: number;
+  email: string;
+  full_name: string;
+  phone?: string;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+  gender?: string;
+  date_of_birth?: string;
+  address?: string;
+  avatar?: string;
+  students?: {
+    id: number;
+    student_code: string;
+    admission_year?: number;
+    gpa?: number;
+    credits_earned?: number;
+    academic_status?: string;
+    classes?: {
+      class_name: string;
+    };
+  };
+  instructors?: {
+    id: number;
+    instructor_code: string;
+    degree?: string;
+    academic_title?: string;
+    departments_instructors_department_idTodepartments?: {
+      department_name: string;
+    };
+  };
+}
+
+export interface CreateUserRequest {
+  email: string;
+  username: string;
+  password: string;
+  full_name: string;
+  phone?: string;
+  gender?: string;
+  date_of_birth?: string;
+  address?: string;
+}
+
+export interface UpdateUserRequest {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
+  gender?: string;
+  date_of_birth?: string;
+  address?: string;
+}
+
+export interface CreateStudentRequest {
+  student_code: string;
+  class_id: number;
+  user: CreateUserRequest;
+}
+
+export interface CreateInstructorRequest {
+  instructor_code: string;
+  department_id: number;
+  degree?: string;
+  academic_title?: string;
+  specialization?: string;
+  years_of_experience?: number;
+  user: CreateUserRequest;
 }

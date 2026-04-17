@@ -4,6 +4,7 @@ import type {
   DefenseCouncil,
   AddCouncilMemberRequest,
   CouncilMember,
+  CouncilMemberWithInstructor,
   CreateDefenseAssignmentRequest,
   DefenseAssignment,
   SubmitDefenseResultRequest,

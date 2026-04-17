@@ -67,4 +67,27 @@ export const instructorService = {
   async getActiveThesisRounds(): Promise<any[]> {
     return apiClient.get<any[]>(`/api/instructors/thesis-rounds/active`, true);
   },
+
+  /**
+   * Get supervised students for an instructor
+   * GET /api/instructors/:id/supervised-students
+   * Authentication required
+   */
+  async getSupervisedStudents(
+    instructorId: number,
+    params?: {
+      thesis_round_id?: number;
+      status?: string;
+    }
+  ): Promise<any[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.thesis_round_id) queryParams.append('thesis_round_id', params.thesis_round_id.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const queryString = queryParams.toString();
+    return apiClient.get<any[]>(
+      `/api/instructors/${instructorId}/supervised-students${queryString ? `?${queryString}` : ''}`,
+      true
+    );
+  },
 };

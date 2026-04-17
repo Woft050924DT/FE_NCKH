@@ -16,6 +16,7 @@ import { HeadReports } from './pages/HeadReports';
 import { HeadMessages } from './pages/HeadMessages';
 import { HeadAssignInstructors } from './pages/HeadAssignInstructors';
 import { HeadAssignReviewers } from './pages/HeadAssignReviewers';
+import { HeadReviewSchedule } from './pages/HeadReviewSchedule';
 import { ThesisRounds } from './pages/ThesisRounds';
 import { Messages } from './pages/Messages';
 import { WeeklyReports } from './pages/WeeklyReports';
@@ -27,6 +28,7 @@ import { InstructorAllReports } from './pages/InstructorAllReports';
 import { InstructorGrading } from './pages/InstructorGrading';
 import { ReviewSchedule } from './pages/ReviewSchedule';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { Toaster } from './components/ui/sonner';
 
 function ProtectedRoute({ 
   children, 
@@ -103,6 +105,11 @@ function AppRoutes() {
       <Route path="/assign-reviewers" element={
         <ProtectedRoute>
           {(userRole === 'head' || userRole === 'department_head') && <HeadAssignReviewers />}
+        </ProtectedRoute>
+      } />
+      <Route path="/review-schedule" element={
+        <ProtectedRoute>
+          {(userRole === 'head' || userRole === 'department_head') && <HeadReviewSchedule />}
         </ProtectedRoute>
       } />
       <Route path="/messages" element={
@@ -201,6 +208,7 @@ export default function App() {
           <Route path="/login" element={<LoginWrapper />} />
           <Route path="/*" element={<AppRoutes />} />
         </Routes>
+        <Toaster />
       </AuthProvider>
     </BrowserRouter>
   );

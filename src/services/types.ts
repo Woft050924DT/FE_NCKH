@@ -339,32 +339,42 @@ export interface CreateThesisGroupRequest {
   group_type: GroupMode;
   min_members: number;
   max_members: number;
+  student_id: number;
 }
 
 export interface ThesisGroup {
   id: number;
+  group_code: string;
   group_name: string;
   thesis_round_id: number;
   group_type: GroupMode;
   status: Status;
   min_members: number;
   max_members: number;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
   thesis_group_members?: ThesisGroupMember[];
 }
 
 export interface ThesisGroupMember {
   id: number;
   thesis_group_id: number;
+  thesis_round_id: number;
   student_id: number;
   role: MemberRole;
+  join_method: string;
+  is_active: boolean;
+  joined_at: string;
   students?: {
+    id: number;
     student_code: string;
     users: {
+      id: number;
       full_name: string;
       email: string;
-    };
-    classes?: {
-      class_name: string;
+      phone?: string;
+      avatar?: string | null;
     };
   };
 }
@@ -373,6 +383,7 @@ export interface CreateGroupInvitationRequest {
   thesis_group_id: number;
   invited_student_id: number;
   invitation_message?: string;
+  student_id: number;
 }
 
 export interface GroupInvitation {
@@ -382,13 +393,24 @@ export interface GroupInvitation {
   invited_by: number;
   invitation_message?: string;
   status: Status;
+  sent_at: string;
+  responded_at: string | null;
+  response_message: string | null;
   thesis_groups?: {
+    id: number;
+    group_code: string;
     group_name: string;
+    thesis_round_id: number;
+    group_type: GroupMode;
+    status: Status;
   };
   students_invited_by?: {
+    id: number;
     student_code: string;
     users: {
+      id: number;
       full_name: string;
+      email: string;
     };
   };
 }
@@ -1234,6 +1256,79 @@ export interface UpdateUserRequest {
   gender?: string;
   date_of_birth?: string;
   address?: string;
+}
+
+// Student Class Types
+export interface StudentClass {
+  id: number;
+  class_code: string;
+  class_name: string;
+  major_id: number;
+  academic_year: string;
+  student_count: number;
+  advisor_id: number;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentClassDetail extends StudentClass {
+  majors: {
+    id: number;
+    major_code: string;
+    major_name: string;
+    departments: {
+      id: number;
+      department_code: string;
+      department_name: string;
+    };
+  };
+  instructors: {
+    id: number;
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  };
+  students: StudentClassStudent[];
+}
+
+export interface StudentClassStudent {
+  id: number;
+  student_code: string;
+  users: {
+    full_name: string;
+    email: string;
+    phone: string;
+  };
+}
+
+export interface GetClassesParams {
+  department_id?: number;
+  major_id?: number;
+}
+
+export interface StudentInstructor {
+  id: number;
+  instructor_code: string;
+  users: {
+    id: number;
+    full_name: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+  departments?: {
+    id: number;
+    department_code: string;
+    department_name: string;
+  };
+}
+
+export interface GetInstructorsParams {
+  thesis_round_id?: number;
+  department_id?: number;
+  search?: string;
 }
 
 export interface CreateStudentRequest {

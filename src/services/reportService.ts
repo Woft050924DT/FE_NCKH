@@ -84,10 +84,10 @@ export const reportService = {
 
   /**
    * Get thesis progress
-   * GET /api/thesis-progress/:thesisId
+   * GET /api/reports/thesis-progress/:thesisId
    */
   async getThesisProgress(thesisId: number): Promise<ThesisProgress> {
-    return apiClient.get<ThesisProgress>(`/api/thesis-progress/${thesisId}`);
+    return apiClient.get<ThesisProgress>(`/api/reports/thesis-progress/${thesisId}`);
   },
 
   /**
@@ -122,6 +122,16 @@ export const reportService = {
     return apiClient.patch<StandardResponse<WeeklyReport>>(
       `/api/weekly-reports/${reportId}/feedback`,
       data
+    );
+  },
+
+  /**
+   * Get individual thesis reports for a student
+   * GET /api/reports/individual-thesis-reports
+   */
+  async getIndividualThesisReports(studentId: number): Promise<StandardResponse<any[]>> {
+    return apiClient.get<StandardResponse<any[]>>(
+      `/api/reports/individual-thesis-reports?student_id=${studentId}`
     );
   },
 };

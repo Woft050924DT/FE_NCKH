@@ -6,10 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Badge, getStatusBadgeVariant } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Avatar, AvatarGroup } from '../components/ui/Avatar';
-import { Select } from '../components/ui/Select';
+import { Avatar } from '../components/ui/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
-import { thesisRoundsService } from '../../services/thesisRoundsService';
+import { thesisRoundsService, instructorService } from '../../services';
 import type { ThesisRound } from '../../services/types';
 
 export function MyStudents() {
@@ -22,56 +21,9 @@ export function MyStudents() {
   const [selectedThesisRoundId, setSelectedThesisRoundId] = useState<number | undefined>(undefined);
   const [roundsLoading, setRoundsLoading] = useState(true);
   
-  const students = [
-    {
-      id: 1,
-      groupCode: 'KL2024-001',
-      groupName: 'Nhóm nghiên cứu AI',
-      topic: 'Ứng dụng Machine Learning trong phân tích dữ liệu y tế',
-      status: 'IN_PROGRESS',
-      members: [
-        { name: 'Nguyễn Văn A', studentCode: 'SV001', role: 'Leader' },
-        { name: 'Trần Thị B', studentCode: 'SV002', role: 'Member' },
-        { name: 'Lê Văn C', studentCode: 'SV003', role: 'Member' },
-      ],
-      currentWeek: 8,
-      totalWeeks: 15,
-      supervisionScore: 8.5,
-      lastReportDate: '13/04/2026',
-      reportStatus: 'APPROVED',
-    },
-    {
-      id: 2,
-      groupCode: 'KL2024-005',
-      groupName: 'Nhóm NLP',
-      topic: 'Chatbot hỗ trợ khách hàng sử dụng NLP',
-      status: 'IN_PROGRESS',
-      members: [
-        { name: 'Phạm Văn D', studentCode: 'SV010', role: 'Leader' },
-        { name: 'Hoàng Thị E', studentCode: 'SV011', role: 'Member' },
-      ],
-      currentWeek: 7,
-      totalWeeks: 15,
-      supervisionScore: 7.8,
-      lastReportDate: '11/04/2026',
-      reportStatus: 'NEED_CHANGES',
-    },
-    {
-      id: 3,
-      groupCode: 'KL2024-012',
-      groupName: 'Nhóm Web Dev',
-      topic: 'Hệ thống quản lý bán hàng trực tuyến',
-      status: 'IN_PROGRESS',
-      members: [
-        { name: 'Ngô Văn F', studentCode: 'SV020', role: 'Individual' },
-      ],
-      currentWeek: 9,
-      totalWeeks: 15,
-      supervisionScore: 9.0,
-      lastReportDate: '13/04/2026',
-      reportStatus: 'APPROVED',
-    },
-  ];
+  // Supervised students
+  const [students, setStudents] = useState<any[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
 
   // Fetch active thesis rounds on component mount
   useEffect(() => {
@@ -107,6 +59,55 @@ export function MyStudents() {
 
     fetchThesisRounds();
   }, []);
+
+  // Fetch supervised students when thesis round changes or on mount
+  useEffect(() => {
+    const fetchSupervisedStudents = async () => {
+      try {
+        setStudentsLoading(true);
+        const instructorId = user?.instructorId || user?.id || 0;
+        
+        if (!instructorId) {
+          console.warn('No instructor ID found');
+          setStudents([]);
+          return;
+        }
+
+        const params: any = {};
+        if (selectedThesisRoundId) {
+          params.thesis_round_id = selectedThesisRoundId;
+        }
+
+        const data = await instructorService.getSupervisedStudents(instructorId, params);
+        
+        // Transform API data to match UI format
+        const transformedStudents = data.map((item: any) => ({
+          id: item.thesis.id,
+          groupCode: item.thesis_group?.group_code || 'N/A',
+          groupName: item.thesis_group?.group_name || 'Nhóm cá nhân',
+          topic: item.thesis.topic_title,
+          status: item.thesis.status,
+          studentId: item.student.id,
+          studentName: item.student.users?.full_name || 'Unknown',
+          studentCode: item.student.student_code,
+          className: item.student.classes?.class_name || 'N/A',
+          role: item.thesis.role,
+          supervisionScore: item.thesis.supervision_score || 0,
+          finalScore: item.thesis.final_score || 0,
+          thesisRoundName: item.thesis_round?.round_name || 'N/A',
+        }));
+
+        setStudents(transformedStudents);
+      } catch (error) {
+        console.error('Error fetching supervised students:', error);
+        setStudents([]);
+      } finally {
+        setStudentsLoading(false);
+      }
+    };
+
+    fetchSupervisedStudents();
+  }, [selectedThesisRoundId, user]);
 
   const getReportStatusText = (status: string) => {
     const map: Record<string, string> = {
@@ -146,30 +147,45 @@ export function MyStudents() {
         )}
       </div>
 
+      {/* Loading state */}
+      {studentsLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Đang tải danh sách sinh viên...</div>
+        </div>
+      ) : (
+        <>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-primary mb-1">8/12</div>
-            <p className="text-sm text-muted-foreground">Hạn mức hướng dẫn</p>
+            <div className="text-3xl font-bold text-primary mb-1">{students.length}/12</div>
+            <p className="text-sm text-muted-foreground">Sinh viên đang HD</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-green-600 mb-1">3</div>
-            <p className="text-sm text-muted-foreground">Nhóm đang HD</p>
+            <div className="text-3xl font-bold text-green-600 mb-1">
+              {students.filter((s) => s.status === 'IN_PROGRESS').length}
+            </div>
+            <p className="text-sm text-muted-foreground">Đang thực hiện</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-amber-600 mb-1">2</div>
-            <p className="text-sm text-muted-foreground">Báo cáo chờ duyệt</p>
+            <div className="text-3xl font-bold text-amber-600 mb-1">
+              {students.filter((s) => s.status === 'COMPLETED').length}
+            </div>
+            <p className="text-sm text-muted-foreground">Đã hoàn thành</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-blue-600 mb-1">8.4</div>
-            <p className="text-sm text-muted-foreground">Điểm TB</p>
+            <div className="text-3xl font-bold text-blue-600 mb-1">
+              {students.length > 0 
+                ? (students.reduce((sum, s) => sum + (s.supervisionScore || 0), 0) / students.length).toFixed(1)
+                : '0.0'}
+            </div>
+            <p className="text-sm text-muted-foreground">Điểm TB hướng dẫn</p>
           </CardContent>
         </Card>
       </div>
@@ -182,123 +198,126 @@ export function MyStudents() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Tìm kiếm nhóm hoặc sinh viên..." className="pl-10" />
             </div>
-            <Select
-              options={[
-                { value: 'all', label: 'Tất cả đợt khóa luận' },
-                { value: 'KL2024-HK1', label: 'KL2024-HK1' },
-              ]}
-            />
-            <Select
-              options={[
-                { value: 'all', label: 'Tất cả trạng thái' },
-                { value: 'IN_PROGRESS', label: 'Đang thực hiện' },
-                { value: 'COMPLETED', label: 'Hoàn thành' },
-              ]}
-            />
+            <select
+              className="px-3 py-2 bg-background border border-input rounded-lg"
+              defaultValue="all"
+            >
+              <option value="all">Tất cả đợt khóa luận</option>
+              {thesisRounds.map((round) => (
+                <option key={round.id} value={round.id}>
+                  {round.round_name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="px-3 py-2 bg-background border border-input rounded-lg"
+              defaultValue="all"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="IN_PROGRESS">Đang thực hiện</option>
+              <option value="COMPLETED">Hoàn thành</option>
+            </select>
           </div>
         </CardContent>
       </Card>
 
       {/* Students List */}
       <div className="space-y-6">
-        {students.map((student) => (
-          <Card key={student.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <CardTitle className="text-lg">{student.groupName}</CardTitle>
-                    <Badge variant={getStatusBadgeVariant(student.status)}>
-                      Đang thực hiện
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-1">Mã nhóm: {student.groupCode}</p>
-                  <p className="text-sm font-medium">{student.topic}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm">
-                    <Eye className="w-4 h-4" />
-                    Xem chi tiết
-                  </Button>
-                  <Button size="sm" variant="ghost">
-                    <MessageSquare className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Members */}
-                <div>
-                  <h4 className="text-sm font-medium mb-3">Thành viên ({student.members.length})</h4>
-                  <div className="space-y-2">
-                    {student.members.map((member, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Avatar name={member.name} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{member.name}</p>
-                          <p className="text-xs text-muted-foreground">{member.studentCode}</p>
-                        </div>
-                        {member.role === 'Leader' && (
-                          <Badge variant="blue" className="text-xs">Trưởng nhóm</Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Progress */}
-                <div>
-                  <h4 className="text-sm font-medium mb-3">Tiến độ</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Tuần học</span>
-                        <span className="font-medium">{student.currentWeek}/{student.totalWeeks}</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary"
-                          style={{ width: `${(student.currentWeek / student.totalWeeks) * 100}%` }}
-                        />
-                      </div>
+        {students.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Không tìm thấy sinh viên nào</h3>
+              <p className="text-muted-foreground">Thử thay đổi đợt khóa luận hoặc liên hệ quản trị viên</p>
+            </CardContent>
+          </Card>
+        ) : (
+          students.map((student) => (
+            <Card key={student.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle className="text-lg">{student.studentName}</CardTitle>
+                      <Badge variant={getStatusBadgeVariant(student.status)}>
+                        {student.status === 'IN_PROGRESS' ? 'Đang thực hiện' : 'Đã hoàn thành'}
+                      </Badge>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Báo cáo tuần gần nhất</p>
+                    <p className="text-sm text-muted-foreground mb-1">Mã SV: {student.studentCode}</p>
+                    <p className="text-sm text-muted-foreground mb-1">Lớp: {student.className}</p>
+                    <p className="text-sm font-medium">{student.topic}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Đợt: {student.thesisRoundName}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm"
+                      onClick={() => navigate(`/students/${student.studentId}/reports`)}
+                    >
+                      <Eye className="w-4 h-4" />
+                      Xem báo cáo
+                    </Button>
+                    <Button size="sm" variant="ghost">
+                      <MessageSquare className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Student Info */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Thông tin sinh viên</h4>
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{student.lastReportDate}</span>
-                        <Badge variant={getStatusBadgeVariant(student.reportStatus)}>
-                          {getReportStatusText(student.reportStatus)}
+                        <Avatar name={student.studentName} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{student.studentName}</p>
+                          <p className="text-xs text-muted-foreground">{student.studentCode}</p>
+                        </div>
+                      </div>
+                      {student.role === 'LEADER' && (
+                        <Badge variant="secondary" className="text-xs">Trưởng nhóm</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Progress */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Tiến độ</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-sm text-muted-foreground">Trạng thái</span>
+                        <Badge variant={getStatusBadgeVariant(student.status)}>
+                          {student.status === 'IN_PROGRESS' ? 'Đang thực hiện' : 'Đã hoàn thành'}
                         </Badge>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Scores */}
-                <div>
-                  <h4 className="text-sm font-medium mb-3">Điểm đánh giá</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <span className="text-sm text-muted-foreground">Điểm hướng dẫn</span>
-                      <span className="text-xl font-bold text-green-600">{student.supervisionScore}</span>
+                  {/* Scores */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Điểm đánh giá</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-sm text-muted-foreground">Điểm hướng dẫn</span>
+                        <span className="text-xl font-bold text-green-600">{student.supervisionScore || 0}</span>
+                      </div>
+                      {student.finalScore && (
+                        <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <span className="text-sm text-muted-foreground">Điểm tổng kết</span>
+                          <span className="text-xl font-bold text-blue-600">{student.finalScore}</span>
+                        </div>
+                      )}
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => navigate(`/students/${student.id}/reports`)}
-                    >
-                      <FileText className="w-4 h-4" />
-                      Xem báo cáo tuần
-                    </Button>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
+        </>
+      )}
     </PageLayout>
   );
 }

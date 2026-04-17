@@ -7,29 +7,51 @@ import { Badge, getStatusBadgeVariant } from '../components/ui/badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { reportService } from '../../services';
+import { reportService, instructorService } from '../../services';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function InstructorAllReports() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const userRole = user?.role || 'instructor';
-  
+
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState<any[]>([]);
   const [filteredReports, setFilteredReports] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
+  const [supervisedStudents, setSupervisedStudents] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // Get all weekly reports - in real app, filter by instructor's students
-        const response = await reportService.getWeeklyReports();
-        setReports(response || []);
-        setFilteredReports(response || []);
+        
+        // Get supervised students to filter reports
+        const instructorId = user?.instructorId || user?.id || 0;
+        let thesisIds: number[] = [];
+        
+        if (instructorId) {
+          try {
+            const students = await instructorService.getSupervisedStudents(instructorId);
+            setSupervisedStudents(students);
+            thesisIds = students.map((s: any) => s.thesis.id);
+          } catch (error) {
+            console.error('Error fetching supervised students:', error);
+          }
+        }
+
+        // Get all weekly reports
+        const allReports = await reportService.getWeeklyReports();
+        
+        // Filter reports by instructor's supervised students' thesis IDs
+        const filteredByInstructor = thesisIds.length > 0
+          ? allReports.filter((report: any) => thesisIds.includes(report.thesis_id))
+          : allReports;
+        
+        setReports(filteredByInstructor || []);
+        setFilteredReports(filteredByInstructor || []);
       } catch (error) {
         console.error('Error fetching reports:', error);
       } finally {
@@ -37,8 +59,8 @@ export function InstructorAllReports() {
       }
     };
 
-    fetchReports();
-  }, []);
+    fetchData();
+  }, [user]);
 
   useEffect(() => {
     let filtered = reports;

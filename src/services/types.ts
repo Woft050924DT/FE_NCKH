@@ -301,6 +301,9 @@ export interface TopicRegistration {
   head_override_min_members?: number;
   head_override_max_members?: number;
   head_override_reason?: string;
+  applied_group_mode?: GroupMode;
+  applied_min_members?: number;
+  applied_max_members?: number;
   proposed_topics?: ProposedTopic;
   thesis_groups?: ThesisGroup;
   thesis_rounds?: ThesisRound;
@@ -308,8 +311,11 @@ export interface TopicRegistration {
     id: number;
     instructor_code: string;
     users: {
+      id: number;
       full_name: string;
       email: string;
+      phone?: string;
+      avatar?: string;
     };
     departments?: {
       department_name: string;
@@ -351,6 +357,7 @@ export interface ThesisGroup {
   status: Status;
   min_members: number;
   max_members: number;
+  current_members?: number;
   created_by: number;
   created_at: string;
   updated_at: string;
@@ -375,6 +382,10 @@ export interface ThesisGroupMember {
       email: string;
       phone?: string;
       avatar?: string | null;
+    };
+    classes?: {
+      id: number;
+      class_name: string;
     };
   };
 }

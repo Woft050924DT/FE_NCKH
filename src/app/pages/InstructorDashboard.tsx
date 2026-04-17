@@ -251,10 +251,17 @@ export function InstructorDashboard() {
             <div className="p-6 space-y-4">
               <div>
                 <h3 className="font-medium mb-2">Thông tin sinh viên</h3>
-                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                  <p><span className="font-medium">Họ tên:</span> {selectedRegistration.thesis_groups?.thesis_group_members?.[0]?.students?.users?.full_name}</p>
-                  <p><span className="font-medium">Mã SV:</span> {selectedRegistration.thesis_groups?.thesis_group_members?.[0]?.students?.student_code}</p>
-                  <p><span className="font-medium">Lớp:</span> {selectedRegistration.thesis_groups?.thesis_group_members?.[0]?.students?.classes?.class_name}</p>
+                <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                  {selectedRegistration.thesis_groups?.thesis_group_members?.map((member: any, index: number) => (
+                    <div key={index} className="border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                      <div className="space-y-1">
+                        <p><span className="font-medium">Họ tên:</span> {member.students?.users?.full_name}</p>
+                        <p><span className="font-medium">Mã SV:</span> {member.students?.student_code}</p>
+                        <p><span className="font-medium">Lớp:</span> {member.students?.classes?.class_name}</p>
+                        <p><span className="font-medium">Vai trò:</span> {member.role === 'LEADER' ? 'Nhóm trưởng' : 'Thành viên'}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div>

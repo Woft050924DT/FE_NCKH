@@ -64,4 +64,13 @@ export const thesisGroupsService = {
   async getInvitations(studentId: number): Promise<GroupInvitation[]> {
     return apiClient.get<GroupInvitation[]>(`/api/thesis-groups/invitations?student_id=${studentId}`);
   },
+
+  /**
+   * Leave a thesis group (Student only)
+   * POST /api/thesis-groups/leave
+   * Request body includes: student_id, thesis_group_id
+   */
+  async leaveGroup(studentId: number, thesisGroupId: number): Promise<any> {
+    return apiClient.post<any>('/api/thesis-groups/leave', { student_id: studentId, thesis_group_id: thesisGroupId });
+  },
 };

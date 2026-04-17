@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAuth } from '../../contexts/AuthContext';
 import { thesisGroupsService } from '../../services/thesisGroupsService';
 import { studentService } from '../../services/studentService';
-import type { ThesisGroup, GroupInvitation, StudentClass, StudentClassStudent } from '../../services/types';
+import { thesisRoundsService } from '../../services/thesisRoundsService';
+import type { ThesisGroup, GroupInvitation, StudentClass, StudentClassStudent, ThesisRound } from '../../services/types';
 
 export function GroupManagement() {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ export function GroupManagement() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchingStudents, setSearchingStudents] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thesisRounds, setThesisRounds] = useState<ThesisRound[]>([]);
 
   // Fetch data on mount
   useEffect(() => {
@@ -61,6 +63,13 @@ export function GroupManagement() {
       fetchStudentsByClass();
     }
   }, [selectedClass]);
+
+  // Fetch thesis rounds when create group modal opens
+  useEffect(() => {
+    if (isCreateGroupModalOpen) {
+      fetchThesisRounds();
+    }
+  }, [isCreateGroupModalOpen]);
 
   const fetchStudentsByClass = async () => {
     if (!selectedClass) return;
@@ -82,6 +91,15 @@ export function GroupManagement() {
       setClasses(classData);
     } catch (e) {
       console.error('Error fetching classes:', e);
+    }
+  };
+
+  const fetchThesisRounds = async () => {
+    try {
+      const response = await thesisRoundsService.getThesisRoundsForStudent();
+      setThesisRounds(response.data || []);
+    } catch (e) {
+      console.error('Error fetching thesis rounds:', e);
     }
   };
 
@@ -279,6 +297,23 @@ export function GroupManagement() {
     }
   };
 
+  const handleLeaveGroup = async () => {
+    if (!user?.studentId || !myGroup) return;
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      await thesisGroupsService.leaveGroup(user.studentId, myGroup.id);
+      fetchData();
+    } catch (e: any) {
+      console.error('Error leaving group:', e);
+      setError(e.response?.data?.error || 'Không thể rời nhóm. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <PageLayout
@@ -311,16 +346,22 @@ export function GroupManagement() {
         </div>
       )}
       <Tabs defaultValue="my-group">
-        <TabsList>
-          <TabsTrigger value="my-group">Nhóm của tôi</TabsTrigger>
-          <TabsTrigger value="invitations">
-            Lời mời
-            {invitations.length > 0 && (
-              <Badge variant="destructive" className="ml-2">{invitations.length}</Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="find-group">Tìm nhóm</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between mb-6">
+          <TabsList>
+            <TabsTrigger value="my-group">Nhóm của tôi</TabsTrigger>
+            <TabsTrigger value="invitations">
+              Lời mời
+              {invitations.length > 0 && (
+                <Badge variant="destructive" className="ml-2">{invitations.length}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="find-group">Tìm nhóm</TabsTrigger>
+          </TabsList>
+          <Button onClick={() => setIsCreateGroupModalOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Tạo nhóm mới
+          </Button>
+        </div>
 
         {/* My Group Tab */}
         <TabsContent value="my-group" className="mt-6">
@@ -379,8 +420,13 @@ export function GroupManagement() {
                         Mời thành viên
                       </Button>
                     )}
-                    <Button variant="ghost" className="flex-1">
-                      Rời nhóm
+                    <Button
+                      variant="ghost"
+                      className="flex-1"
+                      onClick={handleLeaveGroup}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Rời nhóm'}
                     </Button>
                   </div>
                 </CardContent>
@@ -549,15 +595,21 @@ export function GroupManagement() {
           </div>
           <div>
             <Label htmlFor="thesis_round_id">Đợt khóa luận</Label>
-            <Input 
-              id="thesis_round_id"
-              type="number"
-              placeholder="Nhập ID đợt khóa luận..."
-              required
+            <Select
               value={createGroupForm.thesis_round_id}
-              onChange={(e) => setCreateGroupForm({ ...createGroupForm, thesis_round_id: e.target.value })}
-              className="mt-2"
-            />
+              onValueChange={(value) => setCreateGroupForm({ ...createGroupForm, thesis_round_id: value })}
+            >
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Chọn đợt khóa luận..." />
+              </SelectTrigger>
+              <SelectContent>
+                {thesisRounds.map((round) => (
+                  <SelectItem key={round.id} value={round.id.toString()}>
+                    {round.round_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Loại nhóm</Label>

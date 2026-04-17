@@ -13,6 +13,7 @@ import { SystemSettings } from './pages/SystemSettings';
 import { HeadReports } from './pages/HeadReports';
 import { HeadMessages } from './pages/HeadMessages';
 import { HeadAssignInstructors } from './pages/HeadAssignInstructors';
+import { HeadAssignReviewers } from './pages/HeadAssignReviewers';
 import { ThesisRounds } from './pages/ThesisRounds';
 import { Messages } from './pages/Messages';
 import { WeeklyReports } from './pages/WeeklyReports';
@@ -21,6 +22,7 @@ import { MyTopics } from './pages/MyTopic';
 import { MyStudents } from './pages/MyStudents';
 import { InstructorReports } from './pages/InstructorReports';
 import { InstructorAllReports } from './pages/InstructorAllReports';
+import { InstructorGrading } from './pages/InstructorGrading';
 import { ReviewSchedule } from './pages/ReviewSchedule';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
@@ -96,6 +98,11 @@ function AppRoutes() {
           {(userRole === 'head' || userRole === 'department_head') && <HeadAssignInstructors />}
         </ProtectedRoute>
       } />
+      <Route path="/assign-reviewers" element={
+        <ProtectedRoute>
+          {(userRole === 'head' || userRole === 'department_head') && <HeadAssignReviewers />}
+        </ProtectedRoute>
+      } />
       <Route path="/messages" element={
         <ProtectedRoute>
           {userRole === 'student' && <Messages />}
@@ -133,6 +140,11 @@ function AppRoutes() {
       <Route path="/reviews" element={
         <ProtectedRoute>
           {userRole === 'instructor' && <ReviewSchedule />}
+        </ProtectedRoute>
+      } />
+      <Route path="/grading" element={
+        <ProtectedRoute>
+          {userRole === 'instructor' && <InstructorGrading />}
         </ProtectedRoute>
       } />
       <Route path="/approve-topics" element={

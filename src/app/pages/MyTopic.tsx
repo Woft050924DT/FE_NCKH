@@ -22,6 +22,7 @@ export function MyTopics() {
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'rounds' | 'topics'>('rounds');
   const [selectedRound, setSelectedRound] = useState<ThesisRound | null>(null);
+  const [roundsLoading, setRoundsLoading] = useState(true);
   const [formData, setFormData] = useState<CreateProposedTopicRequest>({
     topic_code: '',
     topic_title: '',
@@ -48,6 +49,7 @@ export function MyTopics() {
   const fetchThesisRounds = async () => {
     console.log('Calling API: /api/instructor/thesis-rounds');
     try {
+      setRoundsLoading(true);
       const data = await thesisRoundsService.getThesisRoundsForInstructor();
       console.log('API Response:', data);
       console.log('Response type:', typeof data);
@@ -61,27 +63,25 @@ export function MyTopics() {
         roundsArray = data;
       } else if (data && typeof data === 'object') {
         const dataObj = data as any;
-        // Check if it has a data property
         if (dataObj.data && Array.isArray(dataObj.data)) {
           roundsArray = dataObj.data;
         } else if (dataObj.success && dataObj.data && Array.isArray(dataObj.data)) {
           roundsArray = dataObj.data;
-        } else {
-          // Try to get values from the object
-          const values = Object.values(dataObj);
-          if (values.length > 0 && Array.isArray(values[0])) {
-            roundsArray = values[0];
-          } else {
-            roundsArray = values as ThesisRound[];
-          }
         }
       }
       
       console.log('Final rounds array:', roundsArray);
       setThesisRounds(roundsArray);
-    } catch (err) {
+      
+      // Auto-select the first round if available
+      if (roundsArray.length > 0 && !selectedRoundId) {
+        setSelectedRoundId(roundsArray[0].id);
+      }
+    } catch (err: any) {
       console.error('Error fetching thesis rounds:', err);
-      setThesisRounds([]);
+      setError('Không thể tải danh sách đợt khóa luận');
+    } finally {
+      setRoundsLoading(false);
     }
   };
 
@@ -177,6 +177,38 @@ export function MyTopics() {
           {error}
         </div>
       )}
+
+      {/* Thesis Round Filter */}
+      <div className="mb-4">
+        <label className="text-sm font-medium mb-2 block">Đợt khóa luận:</label>
+        {roundsLoading ? (
+          <p className="text-sm text-muted-foreground">Đang tải đợt khóa luận...</p>
+        ) : thesisRounds.length > 0 ? (
+          <select
+            className="w-full max-w-xs px-3 py-2 border border-border rounded-md bg-background"
+            value={selectedRoundId || ''}
+            onChange={(e) => {
+              const roundId = e.target.value ? Number(e.target.value) : null;
+              setSelectedRoundId(roundId);
+              if (roundId) {
+                const round = thesisRounds.find(r => r.id === roundId);
+                if (round) {
+                  setSelectedRound(round);
+                  setViewMode('topics');
+                }
+              }
+            }}
+          >
+            {thesisRounds.map((round) => (
+              <option key={round.id} value={round.id}>
+                {round.round_name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-muted-foreground">Không có đợt khóa luận nào</p>
+        )}
+      </div>
 
       {loading ? (
         <div className="text-center py-8">

@@ -69,7 +69,7 @@ export function InstructorDashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
   const handleViewAndApprove = (item: any) => {
     setSelectedRegistration(item.fullData);

@@ -241,4 +241,12 @@ export const thesisRoundsService = {
   async getThesisRoundsForStudent(): Promise<StandardResponse<ThesisRound[]>> {
     return apiClient.get<StandardResponse<ThesisRound[]>>('/api/students/thesis-rounds');
   },
+
+  /**
+   * Get active thesis rounds (for instructor grading)
+   * GET /api/instructors/thesis-rounds
+   */
+  async getActiveThesisRounds(): Promise<ThesisRound[]> {
+    return apiClient.get<ThesisRound[]>('/api/instructors/thesis-rounds');
+  },
 };

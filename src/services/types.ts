@@ -6,6 +6,7 @@ export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
 export type ReviewStatus = 'PENDING_REVIEW' | 'REVIEW_COMPLETED' | 'PENDING_DEFENSE' | 'DEFENSE_COMPLETED' | 'PREPARING';
 export type CouncilRole = 'CHAIRMAN' | 'SECRETARY' | 'MEMBER' | 'REVIEWER';
+export type CouncilStatus = 'PREPARING' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 export type MemberRole = 'LEADER' | 'MEMBER';
 
 // Authentication Types
@@ -751,4 +752,278 @@ export interface StandardResponse<T> {
   success: boolean;
   data: T;
   message: string;
+}
+
+// Instructor Grading Types
+export interface SupervisionStudent {
+  thesis_id: number;
+  thesis_code: string;
+  topic_title: string;
+  thesis_round_id: number;
+  status: string;
+  is_graded: boolean;
+  graded_date: string | null;
+  supervision_score: number | null;
+  members: SupervisionStudentMember[];
+}
+
+export interface SupervisionStudentMember {
+  student_id: number;
+  student_code: string;
+  full_name: string;
+  email: string;
+  class_name: string;
+  role: 'LEADER' | 'MEMBER';
+}
+
+export interface ReviewStudent {
+  thesis_id: number;
+  thesis_code: string;
+  topic_title: string;
+  thesis_round_id: number;
+  status: string;
+  supervisor: {
+    instructor_id: number;
+    instructor_code: string;
+    full_name: string;
+  };
+  review_assignment_id: number;
+  review_order: number;
+  review_deadline: string;
+  is_graded: boolean;
+  graded_date: string | null;
+  review_score: number | null;
+  members: ReviewStudentMember[];
+}
+
+export interface ReviewStudentMember {
+  student_id: number;
+  student_code: string;
+  full_name: string;
+  email: string;
+  class_name: string;
+  role: 'LEADER' | 'MEMBER';
+}
+
+export interface SupervisionCommentRequest {
+  thesis_id: number;
+  comment_content: string;
+  attitude_evaluation: string;
+  capability_evaluation: string;
+  result_evaluation: string;
+  supervision_score: number;
+  defense_approval: boolean;
+  rejection_reason: string | null;
+  instructor_id: number;
+}
+
+export interface SupervisionCommentResponse {
+  id: number;
+  thesis_id: number;
+  instructor_id: number;
+  comment_content: string;
+  attitude_evaluation: string;
+  capability_evaluation: string;
+  result_evaluation: string;
+  supervision_score: number;
+  defense_approval: boolean;
+  comment_date: string;
+}
+
+export interface ReviewResultRequest {
+  review_assignment_id: number;
+  review_content: string;
+  topic_evaluation: string;
+  result_evaluation: string;
+  improvement_suggestions: string | null;
+  review_score: number;
+  defense_approval: boolean;
+  rejection_reason: string | null;
+  review_file: string | null;
+  instructor_id: number;
+}
+
+export interface ReviewResultResponse {
+  id: number;
+  review_assignment_id: number;
+  review_content: string;
+  topic_evaluation: string;
+  result_evaluation: string;
+  improvement_suggestions: string | null;
+  review_score: number;
+  defense_approval: boolean;
+  review_date: string;
+}
+
+export interface ThesisScoresResponse {
+  id: number;
+  thesis_code: string;
+  topic_title: string;
+  supervision_score: number | null;
+  review_score: number | null;
+  defense_score: number | null;
+  status: string;
+  review_assignments: ThesisScoreReviewAssignment[];
+  supervision_comments: ThesisScoreSupervisionComment[];
+}
+
+export interface ThesisScoreReviewAssignment {
+  id: number;
+  review_order: number;
+  status: string;
+  review_results: {
+    review_score: number;
+  };
+  instructors: {
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  };
+}
+
+export interface ThesisScoreSupervisionComment {
+  id: number;
+  supervision_score: number;
+  comment_date: string;
+  instructors: {
+    instructor_code: string;
+    users: {
+      full_name: string;
+    };
+  };
+}
+
+export interface WeeklyReportReviewRequest {
+  instructor_feedback: string;
+  review_score: number;
+  review_status: 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
+  rejection_reason: string | null;
+  instructor_id: number;
+}
+
+export interface WeeklyReportReviewResponse {
+  id: number;
+  instructor_feedback: string;
+  review_score: number;
+  review_status: string;
+  reviewed_at: string;
+}
+
+// Council API Types
+export interface CreateCouncilRequest {
+  council_code: string;
+  council_name: string;
+  thesis_round_id: number;
+  chairman_id: number;
+  secretary_id?: number;
+  defense_date?: string;
+  start_time?: string;
+  end_time?: string;
+  venue?: string;
+  notes?: string;
+  members?: CouncilMemberRequest[];
+}
+
+export interface CouncilMemberRequest {
+  instructor_id: number;
+  role?: CouncilRole;
+  order_number?: number;
+}
+
+export interface UpdateCouncilRequest {
+  council_name?: string;
+  secretary_id?: number;
+  defense_date?: string;
+  start_time?: string;
+  end_time?: string;
+  venue?: string;
+  notes?: string;
+  status?: CouncilStatus;
+}
+
+export interface Council {
+  id: number;
+  council_code: string;
+  council_name: string;
+  thesis_round_id: number;
+  chairman_id: number;
+  secretary_id?: number;
+  defense_date?: string;
+  start_time?: string;
+  end_time?: string;
+  venue?: string;
+  status: CouncilStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  council_members?: CouncilMemberDetail[];
+  instructors_defense_councils_chairman_idToinstructors?: InstructorDetail;
+  instructors_defense_councils_secretary_idToinstructors?: InstructorDetail;
+  thesis_rounds?: ThesisRoundDetail;
+  defense_assignments?: DefenseAssignmentDetail[];
+}
+
+export interface CouncilMemberDetail {
+  id: number;
+  defense_council_id: number;
+  instructor_id: number;
+  role: CouncilRole;
+  order_number?: number;
+  created_at: string;
+  instructors?: {
+    id: number;
+    instructor_code: string;
+    users?: {
+      id: number;
+      full_name: string;
+      email: string;
+    };
+  };
+}
+
+export interface InstructorDetail {
+  id: number;
+  instructor_code: string;
+  users?: {
+    id: number;
+    full_name: string;
+    email: string;
+  };
+}
+
+export interface ThesisRoundDetail {
+  id: number;
+  round_code: string;
+  round_name: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface DefenseAssignmentDetail {
+  id: number;
+  defense_council_id: number;
+  thesis_id: number;
+  defense_order: number;
+  defense_time: string;
+  status: string;
+  theses?: {
+    id: number;
+    thesis_code: string;
+    topic_title: string;
+    thesis_members?: ThesisMemberDetail[];
+  };
+}
+
+export interface ThesisMemberDetail {
+  students?: {
+    users?: {
+      full_name: string;
+    };
+  };
+}
+
+export interface DeleteCouncilResponse {
+  message: string;
+  data: Council;
 }

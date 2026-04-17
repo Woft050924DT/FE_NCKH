@@ -1,4 +1,5 @@
 import { Search, Eye, MessageSquare, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { PageLayout } from '../components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -8,11 +9,19 @@ import { Input } from '../components/ui/Input';
 import { Avatar, AvatarGroup } from '../components/ui/Avatar';
 import { Select } from '../components/ui/Select';
 import { useAuth } from '../../contexts/AuthContext';
+import { thesisRoundsService } from '../../services/thesisRoundsService';
+import type { ThesisRound } from '../../services/types';
 
 export function MyStudents() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const userRole = user?.role || 'instructor';
+  
+  // Thesis rounds
+  const [thesisRounds, setThesisRounds] = useState<ThesisRound[]>([]);
+  const [selectedThesisRoundId, setSelectedThesisRoundId] = useState<number | undefined>(undefined);
+  const [roundsLoading, setRoundsLoading] = useState(true);
+  
   const students = [
     {
       id: 1,
@@ -64,6 +73,41 @@ export function MyStudents() {
     },
   ];
 
+  // Fetch active thesis rounds on component mount
+  useEffect(() => {
+    const fetchThesisRounds = async () => {
+      try {
+        setRoundsLoading(true);
+        const data = await thesisRoundsService.getThesisRoundsForInstructor();
+        
+        // Handle different response formats
+        let roundsArray: ThesisRound[] = [];
+        if (Array.isArray(data)) {
+          roundsArray = data;
+        } else if (data && typeof data === 'object') {
+          const dataObj = data as any;
+          if (dataObj.data && Array.isArray(dataObj.data)) {
+            roundsArray = dataObj.data;
+          } else if (dataObj.success && dataObj.data && Array.isArray(dataObj.data)) {
+            roundsArray = dataObj.data;
+          }
+        }
+        
+        setThesisRounds(roundsArray);
+        // Auto-select the first round if available
+        if (roundsArray.length > 0) {
+          setSelectedThesisRoundId(roundsArray[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching thesis rounds:', error);
+      } finally {
+        setRoundsLoading(false);
+      }
+    };
+
+    fetchThesisRounds();
+  }, []);
+
   const getReportStatusText = (status: string) => {
     const map: Record<string, string> = {
       'APPROVED': 'Đã duyệt',
@@ -80,6 +124,28 @@ export function MyStudents() {
       title="Sinh viên hướng dẫn"
       subtitle="Quản lý sinh viên đang hướng dẫn"
     >
+      {/* Thesis Round Filter */}
+      <div className="mb-4">
+        <label className="text-sm font-medium mb-2 block">Đợt khóa luận:</label>
+        {roundsLoading ? (
+          <p className="text-sm text-muted-foreground">Đang tải đợt khóa luận...</p>
+        ) : thesisRounds.length > 0 ? (
+          <select
+            className="w-full max-w-xs px-3 py-2 border border-border rounded-md bg-background"
+            value={selectedThesisRoundId || ''}
+            onChange={(e) => setSelectedThesisRoundId(e.target.value ? Number(e.target.value) : undefined)}
+          >
+            {thesisRounds.map((round) => (
+              <option key={round.id} value={round.id}>
+                {round.round_name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-muted-foreground">Không có đợt khóa luận nào</p>
+        )}
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card>

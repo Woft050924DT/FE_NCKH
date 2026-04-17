@@ -1,4 +1,4 @@
-import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus } from 'lucide-react';
+import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus, GraduationCap } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { cn } from '../../../utils/cn';
 import { Avatar } from '../ui/Avatar';
@@ -23,6 +23,7 @@ const menuItems = {
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: FileText, label: 'Đề tài của tôi', path: '/my-topics' },
     { icon: Users, label: 'Sinh viên hướng dẫn', path: '/students' },
+    { icon: GraduationCap, label: 'Chấm điểm', path: '/grading' },
     { icon: ClipboardList, label: 'Báo cáo', path: '/reports' },
     { icon: CheckSquare, label: 'Lịch phản biện', path: '/reviews' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },

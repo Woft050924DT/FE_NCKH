@@ -8,29 +8,41 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Avatar } from '../components/ui/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
+import { ModalCreateBoard } from '../components/ModalCreateBoard';
+import { ModalCouncilDetail } from '../components/ModalCouncilDetail';
+import { councilService } from '../../services/councilService';
+import type { Council } from '../../services/types';
 
 export function DefenseCouncils() {
   const { user } = useAuth();
   const userRole = user?.role || 'head';
   const [loading, setLoading] = useState(true);
-  const [councils, setCouncils] = useState<any[]>([]);
+  const [councils, setCouncils] = useState<Council[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCouncil, setSelectedCouncil] = useState<Council | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const fetchCouncils = async () => {
+    try {
+      setLoading(true);
+      const data = await councilService.getCouncils();
+      setCouncils(data);
+    } catch (error) {
+      console.error('Error fetching councils:', error);
+      setCouncils([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCouncils = async () => {
-      try {
-        setLoading(true);
-        // TODO: Fetch from actual API
-        setCouncils([]);
-      } catch (error) {
-        console.error('Error fetching councils:', error);
-        setCouncils([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCouncils();
   }, []);
+
+  const handleViewDetail = (council: Council) => {
+    setSelectedCouncil(council);
+    setIsDetailModalOpen(true);
+  };
 
   return (
     <PageLayout
@@ -39,7 +51,7 @@ export function DefenseCouncils() {
       title="Hội đồng bảo vệ"
       subtitle="Quản lý các hội đồng bảo vệ khóa luận"
       actions={
-        <Button>
+        <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Tạo hội đồng mới
         </Button>
@@ -56,9 +68,10 @@ export function DefenseCouncils() {
             <Select
               options={[
                 { value: 'all', label: 'Tất cả trạng thái' },
-                { value: 'Preparing', label: 'Chuẩn bị' },
-                { value: 'Ongoing', label: 'Đang diễn ra' },
-                { value: 'Completed', label: 'Hoàn thành' },
+                { value: 'PREPARING', label: 'Chuẩn bị' },
+                { value: 'SCHEDULED', label: 'Đã lên lịch' },
+                { value: 'COMPLETED', label: 'Hoàn thành' },
+                { value: 'CANCELLED', label: 'Đã hủy' },
               ]}
             />
             <Select
@@ -82,7 +95,7 @@ export function DefenseCouncils() {
           <CardContent className="p-8 text-center">
             <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground mb-4">Chưa có hội đồng nào</p>
-            <Button>Tạo hội đồng đầu tiên</Button>
+            <Button onClick={() => setIsModalOpen(true)}>Tạo hội đồng đầu tiên</Button>
           </CardContent>
         </Card>
       ) : (
@@ -92,13 +105,14 @@ export function DefenseCouncils() {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <CardTitle className="text-lg">{council.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{council.code}</p>
+                    <CardTitle className="text-lg">{council.council_name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{council.council_code}</p>
                   </div>
                   <Badge variant={getStatusBadgeVariant(council.status)}>
-                    {council.status === 'Preparing' && 'Chuẩn bị'}
-                    {council.status === 'Ongoing' && 'Đang diễn ra'}
-                    {council.status === 'Completed' && 'Hoàn thành'}
+                    {council.status === 'PREPARING' && 'Chuẩn bị'}
+                    {council.status === 'SCHEDULED' && 'Đã lên lịch'}
+                    {council.status === 'COMPLETED' && 'Hoàn thành'}
+                    {council.status === 'CANCELLED' && 'Đã hủy'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -106,18 +120,23 @@ export function DefenseCouncils() {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span>{council.date}</span>
+                    <span>{council.defense_date || 'Chưa xác định'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Shield className="w-4 h-4 text-muted-foreground" />
-                    <span>{council.theses} luận văn</span>
+                    <span>{council.defense_assignments?.length || 0} luận văn</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Users className="w-4 h-4 text-muted-foreground" />
-                    <span>{council.members} thành viên</span>
+                    <span>{council.council_members?.length || 0} thành viên</span>
                   </div>
                 </div>
-                <Button size="sm" variant="outline" className="w-full">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleViewDetail(council)}
+                >
                   Xem chi tiết
                 </Button>
               </CardContent>
@@ -125,6 +144,20 @@ export function DefenseCouncils() {
           ))}
         </div>
       )}
+      
+      <ModalCreateBoard
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          fetchCouncils();
+        }}
+      />
+      
+      <ModalCouncilDetail
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        council={selectedCouncil}
+      />
     </PageLayout>
   );
 }

@@ -15,3 +15,4 @@ export { gradingService } from './gradingService';
 export { reportService } from './reportService';
 export { defenseService } from './defenseService';
 export { instructorService } from './instructorService';
+export { studentThesisService } from './studentThesisService';

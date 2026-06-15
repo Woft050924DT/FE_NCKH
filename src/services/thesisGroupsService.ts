@@ -73,4 +73,52 @@ export const thesisGroupsService = {
   async leaveGroup(studentId: number, thesisGroupId: number): Promise<any> {
     return apiClient.post<any>('/api/thesis-groups/leave', { student_id: studentId, thesis_group_id: thesisGroupId });
   },
+
+  /**
+   * Get thesis group by ID
+   * GET /api/thesis-groups/:id
+   */
+  async getThesisGroupById(id: number): Promise<ThesisGroup> {
+    return apiClient.get<ThesisGroup>(`/api/thesis-groups/${id}`);
+  },
+
+  /**
+   * Update thesis group (Student only)
+   * PUT /api/thesis-groups/:id
+   */
+  async updateThesisGroup(id: number, data: any): Promise<ThesisGroup> {
+    return apiClient.put<ThesisGroup>(`/api/thesis-groups/${id}`, data);
+  },
+
+  /**
+   * Lock thesis group (Student only)
+   * PUT /api/thesis-groups/:id/lock
+   */
+  async lockThesisGroup(id: number): Promise<ThesisGroup> {
+    return apiClient.put<ThesisGroup>(`/api/thesis-groups/${id}/lock`);
+  },
+
+  /**
+   * Dissolve thesis group (Student only)
+   * PUT /api/thesis-groups/:id/dissolve
+   */
+  async dissolveThesisGroup(id: number): Promise<any> {
+    return apiClient.put<any>(`/api/thesis-groups/${id}/dissolve`);
+  },
+
+  /**
+   * Add group member (Admin only)
+   * POST /api/thesis-groups/:id/members
+   */
+  async addGroupMember(id: number, data: any): Promise<any> {
+    return apiClient.post<any>(`/api/thesis-groups/${id}/members`, data);
+  },
+
+  /**
+   * Remove group member (Admin only)
+   * DELETE /api/thesis-groups/:id/members/:memberId
+   */
+  async removeGroupMember(id: number, memberId: number): Promise<any> {
+    return apiClient.delete<any>(`/api/thesis-groups/${id}/members/${memberId}`);
+  },
 };

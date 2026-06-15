@@ -14,16 +14,25 @@ export const topicRegistrationService = {
    * POST /api/topic-registrations/proposed-topics
    */
   async createProposedTopic(data: CreateProposedTopicRequest): Promise<ProposedTopic> {
-    return apiClient.post<ProposedTopic>('/api/topic-registrations/proposed-topics', data, false);
+    return apiClient.post<ProposedTopic>('/api/topic-registrations/proposed-topics', data);
   },
 
   /**
    * Get proposed topics
    * GET /api/topic-registrations/proposed-topics
    */
-  async getProposedTopics(thesisRoundId?: number): Promise<ProposedTopic[]> {
-    const queryParams = thesisRoundId ? `?thesis_round_id=${thesisRoundId}` : '';
-    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics${queryParams}`, false);
+  async getProposedTopics(thesisRoundId?: number): Promise<any[]> {
+    const queryParams = thesisRoundId ? `?thesisRoundId=${thesisRoundId}` : '';
+    const response = await apiClient.get<any>(`/api/thesis/available-topics${queryParams}`, true);
+    const topics = response.data || [];
+    return topics.map((t: any) => ({
+      id: t.id,
+      topic_code: t.topic_code || `TOPIC-${t.id}`,
+      topic_title: t.topicTitle || t.topic_title,
+      topic_description: t.topicDescription || t.topic_description,
+      is_taken: false,
+      instructors: { id: t.instructor?.id }
+    }));
   },
 
   /**
@@ -35,7 +44,7 @@ export const topicRegistrationService = {
     params.append('instructor_id', instructorId.toString());
     if (thesisRoundId) params.append('thesis_round_id', thesisRoundId.toString());
     const queryParams = params.toString();
-    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics?${queryParams}`, false);
+    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics?${queryParams}`);
   },
 
   /**
@@ -43,7 +52,7 @@ export const topicRegistrationService = {
    * POST /api/topic-registrations
    */
   async createTopicRegistration(data: CreateTopicRegistrationRequest): Promise<TopicRegistration> {
-    return apiClient.post<TopicRegistration>('/api/topic-registrations', data, false);
+    return apiClient.post<TopicRegistration>('/api/topic-registrations', data);
   },
 
   /**
@@ -55,37 +64,31 @@ export const topicRegistrationService = {
     if (studentId) params.append('student_id', studentId.toString());
     if (status) params.append('status', status);
     const queryParams = params.toString();
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations${queryParams ? '?' + queryParams : ''}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations${queryParams ? '?' + queryParams : ''}`);
   },
 
   /**
-   * Get pending registrations (Instructor only)
+   * Get pending registrations for instructor
    * GET /api/topic-registrations/pending
    */
   async getPendingRegistrations(instructorId: number): Promise<TopicRegistration[]> {
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending?instructor_id=${instructorId}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending?instructor_id=${instructorId}`);
   },
 
   /**
-   * Approve/reject a registration (Instructor only)
+   * Approve/Reject registration (Instructor)
    * PUT /api/topic-registrations/:id/approve
    */
-  async approveRegistration(
-    id: number,
-    data: ApproveRegistrationRequest
-  ): Promise<TopicRegistration> {
-    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/approve`, data, false);
+  async approveRegistration(id: number, data: ApproveRegistrationRequest): Promise<TopicRegistration> {
+    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/approve`, data);
   },
 
   /**
-   * Approve/reject a registration (Head only)
+   * Final approve/reject (Head of Dept)
    * PUT /api/topic-registrations/:id/head-approve
    */
-  async headApproveRegistration(
-    id: number,
-    data: HeadApproveRegistrationRequest
-  ): Promise<TopicRegistration> {
-    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/head-approve`, data, false);
+  async headApproveRegistration(id: number, data: HeadApproveRegistrationRequest): Promise<TopicRegistration> {
+    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/head-approve`, data);
   },
 
   /**
@@ -93,14 +96,14 @@ export const topicRegistrationService = {
    * GET /api/topic-registrations/pending/head
    */
   async getPendingRegistrationsForHead(departmentId: number): Promise<TopicRegistration[]> {
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending/head?department_id=${departmentId}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending/head?department_id=${departmentId}`);
   },
 
   /**
-   * Get topic registration details by ID
+   * Get registration details
    * GET /api/topic-registrations/:id
    */
   async getTopicRegistrationById(id: number): Promise<TopicRegistration> {
-    return apiClient.get<TopicRegistration>(`/api/topic-registrations/${id}`, false);
+    return apiClient.get<TopicRegistration>(`/api/topic-registrations/${id}`);
   },
 };

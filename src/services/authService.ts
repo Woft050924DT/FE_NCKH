@@ -31,14 +31,19 @@ export const authService = {
    * Logout from the system
    * POST /api/auth/logout
    */
-  async logout(): Promise<LogoutResponse> {
-    const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/auth/logout', undefined, false);
-    
-    // Clear token and user from localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    
-    return response.data;
+  async logout(): Promise<LogoutResponse | null> {
+    try {
+      // Send auth token to backend so it can log req.user.id
+      const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/auth/logout', undefined, true);
+      return response.data;
+    } catch (error) {
+      console.error('Logout API failed:', error);
+      return null;
+    } finally {
+      // Clear token and user from localStorage regardless of API success
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   },
 
   /**
@@ -58,7 +63,14 @@ export const authService = {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        return JSON.parse(userStr);
+        const user = JSON.parse(userStr);
+        if (user && user.role) {
+          user.role = user.role.toLowerCase();
+        }
+        if (user && user.roles) {
+          user.roles = user.roles.map((r: string) => r.toLowerCase());
+        }
+        return user;
       } catch {
         return null;
       }

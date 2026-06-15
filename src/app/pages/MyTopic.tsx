@@ -70,8 +70,9 @@ export function MyTopics() {
         }
       }
       
-      console.log('Final rounds array:', roundsArray);
-      setThesisRounds(roundsArray);
+      const activeRounds = roundsArray.filter((r: any) => r.status?.toUpperCase() === 'ACTIVE');
+      console.log('Final rounds array:', activeRounds);
+      setThesisRounds(activeRounds);
       
       // Auto-select the first round if available
       if (roundsArray.length > 0 && !selectedRoundId) {

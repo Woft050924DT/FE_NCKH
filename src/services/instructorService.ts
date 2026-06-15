@@ -11,13 +11,22 @@ export const instructorService = {
     search?: string;
     department_id?: number;
   }): Promise<any[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.thesis_round_id) queryParams.append('thesis_round_id', params.thesis_round_id.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.department_id) queryParams.append('department_id', params.department_id.toString());
-    
-    const queryString = queryParams.toString();
-    return apiClient.get<any[]>(`/api/instructors${queryString ? `?${queryString}` : ''}`, false);
+    if (params?.thesis_round_id) {
+      const response = await apiClient.get<any>(`/api/admin/thesis-rounds/${params.thesis_round_id}/instructors`);
+      const assignments = Array.isArray(response) ? response : (response.data || []);
+      return assignments.map((assignment: any) => ({
+        ...assignment.instructors,
+        instructor_assignments: [assignment]
+      }));
+    } else {
+      const queryParams = new URLSearchParams();
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.department_id) queryParams.append('department_id', params.department_id.toString());
+      
+      const queryString = queryParams.toString();
+      const response = await apiClient.get<any>(`/api/instructors${queryString ? `?${queryString}` : ''}`);
+      return Array.isArray(response) ? response : (response.data || []);
+    }
   },
 
   /**

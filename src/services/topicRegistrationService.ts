@@ -14,7 +14,7 @@ export const topicRegistrationService = {
    * POST /api/topic-registrations/proposed-topics
    */
   async createProposedTopic(data: CreateProposedTopicRequest): Promise<ProposedTopic> {
-    return apiClient.post<ProposedTopic>('/api/topic-registrations/proposed-topics', data, false);
+    return apiClient.post<ProposedTopic>('/api/topic-registrations/proposed-topics', data);
   },
 
   /**
@@ -23,7 +23,7 @@ export const topicRegistrationService = {
    */
   async getProposedTopics(thesisRoundId?: number): Promise<ProposedTopic[]> {
     const queryParams = thesisRoundId ? `?thesis_round_id=${thesisRoundId}` : '';
-    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics${queryParams}`, false);
+    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics${queryParams}`);
   },
 
   /**
@@ -35,7 +35,7 @@ export const topicRegistrationService = {
     params.append('instructor_id', instructorId.toString());
     if (thesisRoundId) params.append('thesis_round_id', thesisRoundId.toString());
     const queryParams = params.toString();
-    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics?${queryParams}`, false);
+    return apiClient.get<ProposedTopic[]>(`/api/topic-registrations/proposed-topics?${queryParams}`);
   },
 
   /**
@@ -43,7 +43,7 @@ export const topicRegistrationService = {
    * POST /api/topic-registrations
    */
   async createTopicRegistration(data: CreateTopicRegistrationRequest): Promise<TopicRegistration> {
-    return apiClient.post<TopicRegistration>('/api/topic-registrations', data, false);
+    return apiClient.post<TopicRegistration>('/api/topic-registrations', data);
   },
 
   /**
@@ -55,7 +55,7 @@ export const topicRegistrationService = {
     if (studentId) params.append('student_id', studentId.toString());
     if (status) params.append('status', status);
     const queryParams = params.toString();
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations${queryParams ? '?' + queryParams : ''}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations${queryParams ? '?' + queryParams : ''}`);
   },
 
   /**
@@ -63,7 +63,7 @@ export const topicRegistrationService = {
    * GET /api/topic-registrations/pending
    */
   async getPendingRegistrations(instructorId: number): Promise<TopicRegistration[]> {
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending?instructor_id=${instructorId}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending?instructor_id=${instructorId}`);
   },
 
   /**
@@ -74,7 +74,7 @@ export const topicRegistrationService = {
     id: number,
     data: ApproveRegistrationRequest
   ): Promise<TopicRegistration> {
-    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/approve`, data, false);
+    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/approve`, data);
   },
 
   /**
@@ -85,7 +85,7 @@ export const topicRegistrationService = {
     id: number,
     data: HeadApproveRegistrationRequest
   ): Promise<TopicRegistration> {
-    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/head-approve`, data, false);
+    return apiClient.put<TopicRegistration>(`/api/topic-registrations/${id}/head-approve`, data);
   },
 
   /**
@@ -93,7 +93,7 @@ export const topicRegistrationService = {
    * GET /api/topic-registrations/pending/head
    */
   async getPendingRegistrationsForHead(departmentId: number): Promise<TopicRegistration[]> {
-    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending/head?department_id=${departmentId}`, false);
+    return apiClient.get<TopicRegistration[]>(`/api/topic-registrations/pending/head?department_id=${departmentId}`);
   },
 
   /**
@@ -101,6 +101,6 @@ export const topicRegistrationService = {
    * GET /api/topic-registrations/:id
    */
   async getTopicRegistrationById(id: number): Promise<TopicRegistration> {
-    return apiClient.get<TopicRegistration>(`/api/topic-registrations/${id}`, false);
+    return apiClient.get<TopicRegistration>(`/api/topic-registrations/${id}`);
   },
 };

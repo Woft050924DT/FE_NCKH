@@ -27,8 +27,13 @@ import { InstructorReports } from './pages/InstructorReports';
 import { InstructorAllReports } from './pages/InstructorAllReports';
 import { InstructorGrading } from './pages/InstructorGrading';
 import { ReviewSchedule } from './pages/ReviewSchedule';
+import { Courses } from './pages/Courses';
+import { InstructorCourse } from './pages/InstructorCourse';
+import { ManageCourses } from './pages/ManageCourses';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { Toaster } from './components/ui/sonner';
+import { AIChatBox } from './components/AIChatBox';
+import ApiTestPage from './pages/ApiTestPage';
 
 function ProtectedRoute({ 
   children, 
@@ -131,6 +136,11 @@ function AppRoutes() {
           {userRole === 'student' && <Scores />}
         </ProtectedRoute>
       } />
+      <Route path="/courses" element={
+        <ProtectedRoute>
+          {userRole === 'student' && <Courses />}
+        </ProtectedRoute>
+      } />
       <Route path="/my-topics" element={
         <ProtectedRoute>
           {userRole === 'instructor' && <MyTopics />}
@@ -156,6 +166,11 @@ function AppRoutes() {
           {userRole === 'instructor' && <InstructorGrading />}
         </ProtectedRoute>
       } />
+      <Route path="/instructor-courses" element={
+        <ProtectedRoute>
+          {userRole === 'instructor' && <InstructorCourse />}
+        </ProtectedRoute>
+      } />
       <Route path="/approve-topics" element={
         <ProtectedRoute>
           {(userRole === 'head' || userRole === 'department_head') && <HeadApproveTopics />}
@@ -164,6 +179,11 @@ function AppRoutes() {
       <Route path="/councils" element={
         <ProtectedRoute>
           {(userRole === 'head' || userRole === 'department_head') && <DefenseCouncils />}
+        </ProtectedRoute>
+      } />
+      <Route path="/manage-courses" element={
+        <ProtectedRoute>
+          {(userRole === 'head' || userRole === 'department_head') && <ManageCourses />}
         </ProtectedRoute>
       } />
       <Route path="/organization" element={
@@ -181,6 +201,7 @@ function AppRoutes() {
           {userRole === 'admin' && <SystemSettings />}
         </ProtectedRoute>
       } />
+      <Route path="/api-test" element={<ApiTestPage />} />
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -209,6 +230,7 @@ export default function App() {
           <Route path="/*" element={<AppRoutes />} />
         </Routes>
         <Toaster />
+        <AIChatBox />
       </AuthProvider>
     </BrowserRouter>
   );

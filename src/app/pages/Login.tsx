@@ -14,17 +14,6 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleDemoLogin = (role: 'student' | 'instructor' | 'head' | 'admin') => {
-    localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('user', JSON.stringify({
-      id: 1,
-      email: 'demo@example.com',
-      fullName: 'Demo User',
-      role: role
-    }));
-    navigate('/dashboard');
-  };
-
   const features = [
     'Quản lý đề tài và nhóm khóa luận',
     'Theo dõi tiến độ và báo cáo',
@@ -160,24 +149,6 @@ export function Login() {
               </a>
             </div>
           </form>
-
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-900 font-medium mb-2">Demo - Chọn vai trò (chỉ dùng cho test):</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('student')} disabled={loading}>
-                Sinh viên
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('instructor')} disabled={loading}>
-                Giảng viên
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('head')} disabled={loading}>
-                Trưởng BM
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('admin')} disabled={loading}>
-                Admin
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

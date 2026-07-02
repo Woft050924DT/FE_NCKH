@@ -81,6 +81,14 @@ export function StudentDashboard() {
       try {
         setLoading(true);
         
+        // Check if user is authenticated before fetching data
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('No token found, skipping API calls');
+          setLoading(false);
+          return;
+        }
+        
         // Get thesis groups
         try {
           const groups = await thesisGroupsService.getThesisGroups(user?.id);

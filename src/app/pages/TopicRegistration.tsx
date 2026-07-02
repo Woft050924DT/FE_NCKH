@@ -138,8 +138,8 @@ export function TopicRegistration() {
   }, [selectedRound]);
 
   const steps = [
-    { number: 1, title: 'Chọn GV hướng dẫn' },
-    { number: 2, title: 'Chọn đề tài' },
+    { number: 1, title: 'Chọn đợt & GVHD' },
+    { number: 2, title: 'Thông tin đề tài' },
     { number: 3, title: 'Xác nhận' },
   ];
 
@@ -270,142 +270,188 @@ export function TopicRegistration() {
         </div>
       </div>
 
-      {/* Step 1: Select Instructor */}
+      {/* Step 1: Select Period & Instructor */}
       {currentStep === 1 && (
-        <div>
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <label className="block text-sm font-medium mb-2">Chọn đợt khóa luận</label>
-              <select
-                className="w-full px-3 py-2 bg-background border border-input rounded-lg"
-                value={selectedRound || ''}
-                onChange={(e) => setSelectedRound(Number(e.target.value))}
-              >
-                <option value="">-- Chọn đợt khóa luận --</option>
-                {thesisRounds
-                  .filter((round: any) => round.status?.toUpperCase() === 'ACTIVE')
-                  .map((round: any) => (
-                    <option key={round.id} value={round.id}>
-                      {round.round_name || round.roundName || `Đợt ${round.id}`}
-                    </option>
-                  ))}
-              </select>
-              {!selectedRound && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Vui lòng chọn đợt khóa luận để xem danh sách giảng viên
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {selectedRound && (
-            <Card className="mb-6">
-              <CardContent className="p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Tìm kiếm giảng viên..."
-                    className="pl-10"
-                    value={instructorSearch}
-                    onChange={handleInstructorSearch}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!selectedRound ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <div className="text-muted-foreground">
-                  Vui lòng chọn đợt khóa luận để xem danh sách giảng viên
-                </div>
-              </CardContent>
-            </Card>
-          ) : loading ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <div className="text-muted-foreground">Đang tải danh sách giảng viên...</div>
-              </CardContent>
-            </Card>
-          ) : filteredInstructors.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <div className="text-muted-foreground">
-                  {instructors.length === 0
-                    ? 'Không có giảng viên nào cho đợt khóa luận này. Vui lòng liên hệ quản trị viên.'
-                    : 'Không tìm thấy giảng viên phù hợp với tìm kiếm.'}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredInstructors.map((instructor) => (
-                <Card
-                  key={instructor.id}
-                  className={`cursor-pointer transition-all ${
-                    selectedInstructor === instructor.id
-                      ? 'ring-2 ring-primary'
-                      : 'hover:shadow-lg'
-                  }`}
-                  onClick={() => setSelectedInstructor(instructor.id)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
-                      <Avatar name={instructor.name} size="lg" />
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{instructor.name}</h3>
-                        <p className="text-sm text-muted-foreground">{instructor.degree}</p>
-                        <p className="text-xs text-muted-foreground">Mã GV: {instructor.instructorCode}</p>
-                      </div>
-                      {selectedInstructor === instructor.id && (
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column: Select Registration Period */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">1. CHỌN ĐỢT ĐĂNG KÝ</h2>
+            <div className="space-y-4">
+              {thesisRounds.map((round: any) => {
+                const isActive = round.status?.toUpperCase() === 'ACTIVE';
+                const isUpcoming = round.status?.toUpperCase() === 'UPCOMING';
+                const isSelected = selectedRound === round.id;
+                const registrationDeadline = round.registration_deadline || 'N/A';
+                const reportDeadline = round.report_deadline || 'N/A';
+                const remainingQuota = round.remaining_quota || 0;
+                const totalQuota = round.total_quota || 1;
+                const registeredPercent = totalQuota > 0 ? ((totalQuota - remainingQuota) / totalQuota * 100).toFixed(0) : '0';
+                
+                return (
+                  <Card
+                    key={round.id}
+                    className={`cursor-pointer transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-primary bg-primary/5'
+                        : 'hover:shadow-lg'
+                    } ${!isActive && !isUpcoming ? 'opacity-50' : ''}`}
+                    onClick={() => isActive && setSelectedRound(round.id)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-base mb-1">
+                            {round.round_name || round.roundName || `Đợt ${round.id}`}
+                          </h3>
+                          <Badge variant={isActive ? 'default' : isUpcoming ? 'secondary' : 'outline'}>
+                            {isActive ? 'Đang mở' : isUpcoming ? 'Sắp mở' : 'Đã đóng'}
+                          </Badge>
                         </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{instructor.specialization}</p>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">Khoa:</span>
-                        <span>{instructor.department}</span>
+                        {isSelected && (
+                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">Kinh nghiệm:</span>
-                        <span>{instructor.yearsOfExperience} năm</span>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Hạn đăng ký:</span>
+                          <span className="font-medium">{registrationDeadline}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Hạn nộp báo cáo:</span>
+                          <span className="font-medium">{reportDeadline}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Còn trống:</span>
+                          <span className="font-medium">{remainingQuota}/{totalQuota}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Đã đăng ký:</span>
+                          <span className="font-medium">{registeredPercent}%</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden mt-2">
+                          <div
+                            className="h-full bg-primary"
+                            style={{ width: `${registeredPercent}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">Email:</span>
-                        <span className="truncate">{instructor.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">SĐT:</span>
-                        <span>{instructor.phone}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Hạn mức</span>
-                        <span className={`font-medium ${
-                          instructor.currentLoad >= instructor.quota ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {instructor.currentLoad}/{instructor.quota}
-                        </span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            instructor.currentLoad >= instructor.quota ? 'bg-red-600' : 'bg-green-600'
-                          }`}
-                          style={{ width: `${(instructor.currentLoad / instructor.quota) * 100}%` }}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Column: Select Supervisor */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">2. CHỌN GIÁO VIÊN HƯỚNG DẪN</h2>
+            
+            {!selectedRound ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="text-6xl">👆</div>
+                    <p className="text-muted-foreground text-lg">Chọn đợt để xem giáo viên hướng dẫn</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {selectedRound && (
+                  <Card className="mb-4">
+                    <CardContent className="p-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Tìm kiếm giảng viên..."
+                          className="pl-10"
+                          value={instructorSearch}
+                          onChange={handleInstructorSearch}
                         />
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {loading ? (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <div className="text-muted-foreground">Đang tải danh sách giảng viên...</div>
+                    </CardContent>
+                  </Card>
+                ) : filteredInstructors.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <div className="text-muted-foreground">
+                        {instructors.length === 0
+                          ? 'Không có giảng viên nào cho đợt khóa luận này. Vui lòng liên hệ quản trị viên.'
+                          : 'Không tìm thấy giảng viên phù hợp với tìm kiếm.'}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                    {filteredInstructors.map((instructor) => (
+                      <Card
+                        key={instructor.id}
+                        className={`cursor-pointer transition-all ${
+                          selectedInstructor === instructor.id
+                            ? 'ring-2 ring-primary'
+                            : 'hover:shadow-lg'
+                        }`}
+                        onClick={() => setSelectedInstructor(instructor.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            <Avatar name={instructor.name} size="lg" />
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-semibold">{instructor.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{instructor.degree}</p>
+                                  <p className="text-xs text-muted-foreground">Mã GV: {instructor.instructorCode}</p>
+                                </div>
+                                {selectedInstructor === instructor.id && (
+                                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Check className="w-4 h-4 text-white" />
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-2">{instructor.specialization}</p>
+                              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                                <span>Khoa: {instructor.department}</span>
+                                <span>Kinh nghiệm: {instructor.yearsOfExperience} năm</span>
+                              </div>
+                              <div className="mt-3">
+                                <div className="flex items-center justify-between text-sm mb-1">
+                                  <span className="text-muted-foreground">Hạn mức</span>
+                                  <span className={`font-medium ${
+                                    instructor.currentLoad >= instructor.quota ? 'text-red-600' : 'text-green-600'
+                                  }`}>
+                                    {instructor.currentLoad}/{instructor.quota}
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full ${
+                                      instructor.currentLoad >= instructor.quota ? 'bg-red-600' : 'bg-green-600'
+                                    }`}
+                                    style={{ width: `${(instructor.currentLoad / instructor.quota) * 100}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -449,7 +495,7 @@ export function TopicRegistration() {
                           </div>
                           <p className="text-sm text-muted-foreground mb-1">Mã: {topic.code}</p>
                         </div>
-                        <Badge variant={topic.isTaken ? 'slate' : 'green'}>
+                        <Badge variant={topic.isTaken ? 'outline' : 'default'}>
                           {topic.isTaken ? 'Đã có nhóm' : 'Còn trống'}
                         </Badge>
                       </div>

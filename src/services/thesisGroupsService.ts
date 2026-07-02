@@ -30,6 +30,30 @@ export const thesisGroupsService = {
   },
 
   /**
+   * Get thesis group by ID
+   * GET /api/thesis-groups/:id
+   */
+  async getThesisGroupById(id: string): Promise<ThesisGroup> {
+    return apiClient.get<ThesisGroup>(`/api/thesis-groups/${id}`);
+  },
+
+  /**
+   * Update thesis group
+   * PUT /api/thesis-groups/:id
+   */
+  async updateThesisGroup(id: string, data: Partial<CreateThesisGroupRequest>): Promise<ThesisGroup> {
+    return apiClient.put<ThesisGroup>(`/api/thesis-groups/${id}`, data);
+  },
+
+  /**
+   * Delete thesis group
+   * DELETE /api/thesis-groups/:id
+   */
+  async deleteThesisGroup(id: string): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`/api/thesis-groups/${id}`);
+  },
+
+  /**
    * Create a group invitation (Student - LEADER only)
    * POST /api/thesis-groups/invitations
    * Request body includes: thesis_group_id, invited_student_id, invitation_message, student_id

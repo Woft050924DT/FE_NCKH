@@ -14,44 +14,8 @@ export function ReviewSchedule() {
   const userRole = user?.role || 'instructor';
   const [selectedReview, setSelectedReview] = useState<number | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
-  const reviews = [
-    {
-      id: 1,
-      thesisCode: 'KL2024-008',
-      thesisTitle: 'Hệ thống IoT giám sát môi trường nông nghiệp',
-      groupName: 'Nhóm IoT Smart Farm',
-      students: ['Nguyễn Văn X', 'Trần Thị Y'],
-      supervisor: 'TS. Lê Văn B',
-      deadline: '20/04/2026',
-      status: 'PENDING_REVIEW',
-      reportFile: 'bao_cao_KL2024-008.pdf',
-    },
-    {
-      id: 2,
-      thesisCode: 'KL2024-015',
-      thesisTitle: 'Ứng dụng Blockchain trong quản lý chuỗi cung ứng',
-      groupName: 'Nhóm Blockchain',
-      students: ['Phạm Văn Z'],
-      supervisor: 'TS. Hoàng Thị C',
-      deadline: '22/04/2026',
-      status: 'PENDING_REVIEW',
-      reportFile: 'bao_cao_KL2024-015.pdf',
-    },
-    {
-      id: 3,
-      thesisCode: 'KL2024-003',
-      thesisTitle: 'Hệ thống nhận diện biển số xe thông minh',
-      groupName: 'Nhóm Computer Vision',
-      students: ['Đỗ Văn M', 'Vũ Thị N'],
-      supervisor: 'PGS. TS. Nguyễn Văn D',
-      deadline: '18/04/2026',
-      status: 'REVIEWED',
-      reviewScore: 8.5,
-      reviewDate: '15/04/2026',
-      reportFile: 'bao_cao_KL2024-003.pdf',
-    },
-  ];
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenReviewModal = (reviewId: number) => {
     setSelectedReview(reviewId);
@@ -59,6 +23,14 @@ export function ReviewSchedule() {
   };
 
   const selectedReviewData = reviews.find(r => r.id === selectedReview);
+
+  // Calculate stats dynamically
+  const pendingCount = reviews.filter(r => r.status === 'PENDING_REVIEW').length;
+  const completedCount = reviews.filter(r => r.status === 'REVIEWED').length;
+  const reviewedItems = reviews.filter(r => r.status === 'REVIEWED' && r.reviewScore);
+  const averageScore = reviewedItems.length > 0 
+    ? (reviewedItems.reduce((sum, r) => sum + r.reviewScore, 0) / reviewedItems.length).toFixed(1)
+    : '0';
 
   return (
     <PageLayout
@@ -71,19 +43,19 @@ export function ReviewSchedule() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-amber-600 mb-1">2</div>
+            <div className="text-3xl font-bold text-amber-600 mb-1">{pendingCount}</div>
             <p className="text-sm text-muted-foreground">Chờ phản biện</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-green-600 mb-1">1</div>
+            <div className="text-3xl font-bold text-green-600 mb-1">{completedCount}</div>
             <p className="text-sm text-muted-foreground">Đã hoàn thành</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-3xl font-bold text-blue-600 mb-1">8.5</div>
+            <div className="text-3xl font-bold text-blue-600 mb-1">{averageScore}</div>
             <p className="text-sm text-muted-foreground">Điểm TB đã chấm</p>
           </CardContent>
         </Card>
@@ -91,7 +63,20 @@ export function ReviewSchedule() {
 
       {/* Reviews List */}
       <div className="space-y-4">
-        {reviews.map((review) => (
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              Đang tải dữ liệu...
+            </CardContent>
+          </Card>
+        ) : reviews.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              Chưa có lịch phản biện nào
+            </CardContent>
+          </Card>
+        ) : (
+          reviews.map((review) => (
           <Card key={review.id} className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -118,7 +103,7 @@ export function ReviewSchedule() {
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Sinh viên</p>
                   <div className="space-y-1">
-                    {review.students.map((student, idx) => (
+                    {review.students.map((student: string, idx: number) => (
                       <p key={idx} className="text-sm font-medium">{student}</p>
                     ))}
                   </div>
@@ -159,7 +144,8 @@ export function ReviewSchedule() {
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Review Modal */}
@@ -270,14 +256,14 @@ export function ReviewSchedule() {
                 <div>
                   <h4 className="font-semibold mb-2">Nhận xét nội dung</h4>
                   <p className="text-sm text-muted-foreground">
-                    Nội dung báo cáo được trình bày rõ ràng, logic. Kết quả thực nghiệm đầy đủ và có tính thuyết phục cao.
+                    {/* TODO: Load review content from API */}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-2">Góp ý cải thiện</h4>
                   <p className="text-sm text-muted-foreground">
-                    Nên bổ sung thêm phần so sánh với các giải pháp khác. Cần làm rõ hơn về hạn chế của hệ thống.
+                    {/* TODO: Load review content from API */}
                   </p>
                 </div>
               </div>

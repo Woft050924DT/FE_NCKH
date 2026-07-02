@@ -13,7 +13,7 @@ export const authService = {
    * POST /api/auth/login
    */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<{ success: boolean; data: LoginResponse; message: string }>('/api/auth/login', credentials, false);
+    const response = await apiClient.post<{ success: boolean; data: LoginResponse; message: string }>('/api/v1/auth/login', credentials, false);
     
     // Extract data from new response format
     const loginData = response.data;
@@ -31,14 +31,15 @@ export const authService = {
    * Logout from the system
    * POST /api/auth/logout
    */
-  async logout(): Promise<LogoutResponse> {
-    const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/auth/logout', undefined, false);
-    
-    // Clear token and user from localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    
-    return response.data;
+  async logout(): Promise<LogoutResponse | null> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/v1/auth/logout', undefined, false);
+      return response.data;
+    } finally {
+      // Clear token and user from localStorage regardless of API success
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   },
 
   /**
@@ -47,7 +48,16 @@ export const authService = {
    */
   async getProfile(userId: number, role: 'student' | 'instructor'): Promise<Profile> {
     const queryParams = `?user_id=${userId}&role=${role}`;
-    const response = await apiClient.get<{ success: boolean; data: Profile; message: string }>(`/api/auth/profile${queryParams}`);
+    const response = await apiClient.get<{ success: boolean; data: Profile; message: string }>(`/api/v1/auth/profile${queryParams}`);
+    return response.data;
+  },
+
+  /**
+   * Get current user information
+   * GET /api/auth/me
+   */
+  async getMe(): Promise<User> {
+    const response = await apiClient.get<{ success: boolean; data: User; message: string }>('/api/v1/auth/me');
     return response.data;
   },
 

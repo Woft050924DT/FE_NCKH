@@ -73,7 +73,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const storedToken = authService.getToken();
     
     if (storedUser && storedToken) {
-      setUser(storedUser);
+      // Normalize role to lowercase
+      const normalizedUser = {
+        ...storedUser,
+        role: storedUser.role.toLowerCase() as UserRole
+      };
+      setUser(normalizedUser);
     }
     setIsLoading(false);
   }, []);
@@ -83,12 +88,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log('Login response user:', response.user);
     console.log('User role:', response.user?.role);
     
+    // Convert role to lowercase to handle backend returning uppercase roles
+    const normalizedUser = response.user ? {
+      ...response.user,
+      role: response.user.role.toLowerCase() as UserRole
+    } : null;
+    
     // Validate role
-    if (response.user?.role && !ROLE_PERMISSIONS[response.user.role]) {
-      throw new Error(`Invalid role: ${response.user.role}`);
+    if (normalizedUser?.role && !ROLE_PERMISSIONS[normalizedUser.role]) {
+      throw new Error(`Invalid role: ${normalizedUser.role}`);
     }
     
-    setUser(response.user);
+    setUser(normalizedUser);
     await refreshProfile();
   };
 

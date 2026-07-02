@@ -17,7 +17,7 @@ export const instructorService = {
     if (params?.department_id) queryParams.append('department_id', params.department_id.toString());
     
     const queryString = queryParams.toString();
-    return apiClient.get<any[]>(`/api/instructors${queryString ? `?${queryString}` : ''}`, false);
+    return apiClient.get<any[]>(`/api/instructors${queryString ? `?${queryString}` : ''}`);
   },
 
   /**
@@ -26,7 +26,7 @@ export const instructorService = {
    * No authentication required
    */
   async getInstructorById(id: number): Promise<any> {
-    return apiClient.get<any>(`/api/instructors/${id}`, false);
+    return apiClient.get<any>(`/api/instructors/${id}`);
   },
 
   /**
@@ -35,7 +35,7 @@ export const instructorService = {
    * No authentication required
    */
   async getInstructorByUserId(userId: number): Promise<any> {
-    return apiClient.get<any>(`/api/instructors/by-user/${userId}`, false);
+    return apiClient.get<any>(`/api/instructors/by-user/${userId}`);
   },
 
   /**
@@ -56,7 +56,7 @@ export const instructorService = {
     full_name: string;
     phone: string;
   }): Promise<any> {
-    return apiClient.post<any>(`/api/instructors`, data, false);
+    return apiClient.post<any>(`/api/instructors`, data);
   },
 
   /**

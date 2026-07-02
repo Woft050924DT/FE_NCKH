@@ -1,5 +1,20 @@
 const BASE_URL = 'http://localhost:3000';
 
+// Custom API Error class for better error handling
+class ApiError extends Error {
+  status: number;
+  response?: any;
+  statusText?: string;
+
+  constructor(message: string, status: number, response?: any, statusText?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.response = response;
+    this.statusText = statusText;
+  }
+}
+
 class ApiClient {
   private getHeaders(includeAuth: boolean = true): HeadersInit {
     const headers: HeadersInit = {
@@ -29,12 +44,16 @@ class ApiClient {
         errorData = { error: bodyText || `HTTP error! status: ${response.status}` };
       }
       
-      const errorMessage = errorData.error || bodyText || `HTTP error! status: ${response.status}`;
-      const error = new Error(errorMessage) as any;
-      error.status = response.status;
-      error.response = errorData;
-      error.statusText = response.statusText;
-      throw error;
+      const errorMessage = errorData.error || errorData.message || bodyText || `HTTP error! status: ${response.status}`;
+      
+      // Handle specific error types
+      if (response.status === 401) {
+        // Unauthorized - clear auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      
+      throw new ApiError(errorMessage, response.status, errorData, response.statusText);
     }
 
     return response.json();
@@ -86,6 +105,23 @@ class ApiClient {
     });
 
     return this.handleResponse<T>(response);
+  }
+
+  /**
+   * Health check for API Gateway
+   * GET /health
+   */
+  async healthCheck(): Promise<{ status: string; timestamp: string }> {
+    const response = await fetch(`${BASE_URL}/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Gateway health check failed: ${response.status}`);
+    }
+
+    return response.json();
   }
 }
 

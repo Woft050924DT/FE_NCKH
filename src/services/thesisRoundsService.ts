@@ -169,6 +169,22 @@ export const thesisRoundsService = {
   },
 
   /**
+   * Update thesis round (Admin only)
+   * PUT /api/admin/thesis-rounds/:id
+   */
+  async updateThesisRound(id: number, data: UpdateThesisRoundRequest): Promise<ThesisRound> {
+    return apiClient.put<ThesisRound>(`/api/admin/thesis-rounds/${id}`, data);
+  },
+
+  /**
+   * Delete thesis round (Admin only)
+   * DELETE /api/admin/thesis-rounds/:id
+   */
+  async deleteThesisRound(id: number): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`/api/admin/thesis-rounds/${id}`);
+  },
+
+  /**
    * Get all thesis rounds (Head of Department)
    * GET /api/department-head/thesis-rounds
    */

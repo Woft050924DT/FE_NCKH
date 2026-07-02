@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, Edit, Trash2, Search, Filter, Clock } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, Search, Filter, Clock, Users, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageLayout } from '../components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
@@ -26,6 +26,30 @@ interface ReviewScheduleItem {
   status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 }
 
+interface CommitteeMember {
+  id: number;
+  name: string;
+  role: 'chairman' | 'secretary' | 'reviewer';
+}
+
+interface Committee {
+  id: number;
+  name: string;
+  members: CommitteeMember[];
+}
+
+interface ScheduleForm {
+  thesisId?: number;
+  thesisCode?: string;
+  thesisTitle?: string;
+  committeeId?: number;
+  reviewer1?: string;
+  reviewer2?: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  location: string;
+}
+
 export function HeadReviewSchedule() {
   const { user } = useAuth();
   const userRole = user?.role || 'head';
@@ -39,61 +63,28 @@ export function HeadReviewSchedule() {
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock data for schedules
-  const mockSchedules: ReviewScheduleItem[] = [
+  // Multi-schedule creation state
+  const [scheduleForms, setScheduleForms] = useState<ScheduleForm[]>([
     {
-      id: 1,
-      thesisCode: 'KL2024-008',
-      thesisTitle: 'Hệ thống IoT giám sát môi trường nông nghiệp',
-      groupName: 'Nhóm IoT Smart Farm',
-      students: ['Nguyễn Văn X', 'Trần Thị Y'],
-      supervisor: 'TS. Lê Văn B',
-      reviewer: 'TS. Hoàng Thị C',
-      scheduledDate: '2026-04-25',
-      scheduledTime: '09:00',
-      location: 'Phòng họp A - Tầng 3',
-      status: 'SCHEDULED',
-    },
-    {
-      id: 2,
-      thesisCode: 'KL2024-015',
-      thesisTitle: 'Ứng dụng Blockchain trong quản lý chuỗi cung ứng',
-      groupName: 'Nhóm Blockchain',
-      students: ['Phạm Văn Z'],
-      supervisor: 'TS. Nguyễn Văn D',
-      reviewer: 'PGS. TS. Trần Thị E',
-      scheduledDate: '2026-04-25',
-      scheduledTime: '10:30',
-      location: 'Phòng họp B - Tầng 3',
-      status: 'SCHEDULED',
-    },
-    {
-      id: 3,
-      thesisCode: 'KL2024-003',
-      thesisTitle: 'Hệ thống nhận diện biển số xe thông minh',
-      groupName: 'Nhóm Computer Vision',
-      students: ['Đỗ Văn M', 'Vũ Thị N'],
-      supervisor: 'PGS. TS. Nguyễn Văn F',
-      reviewer: 'TS. Lê Văn G',
-      scheduledDate: '2026-04-24',
-      scheduledTime: '14:00',
-      location: 'Phòng họp A - Tầng 3',
-      status: 'COMPLETED',
-    },
-  ];
+      scheduledDate: '',
+      scheduledTime: '',
+      location: '',
+    }
+  ]);
+  const [committees, setCommittees] = useState<Committee[]>([]);
+  const [isCreatingCommittee, setIsCreatingCommittee] = useState(false);
+  const [newCommittee, setNewCommittee] = useState({ name: '', members: [] as CommitteeMember[] });
 
   useEffect(() => {
     fetchRounds();
-    // Load schedules from localStorage or use mock data
+    // Load schedules from localStorage
     const savedSchedules = localStorage.getItem('reviewSchedules');
     if (savedSchedules) {
       try {
         setSchedules(JSON.parse(savedSchedules));
       } catch (e) {
-        setSchedules(mockSchedules);
+        setSchedules([]);
       }
-    } else {
-      setSchedules(mockSchedules);
     }
   }, []);
 
@@ -154,27 +145,62 @@ export function HeadReviewSchedule() {
 
   const handleCreateSchedule = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call API to create schedule
-    const newSchedule: ReviewScheduleItem = {
-      id: Date.now(),
-      thesisCode: 'KL2024-NEW',
-      thesisTitle: 'Đề tài mới',
-      groupName: 'Nhóm mới',
-      students: ['Sinh viên A'],
-      supervisor: 'GV Hướng dẫn',
-      reviewer: 'GV Phản biện 1',
-      scheduledDate: new Date().toISOString().split('T')[0],
-      scheduledTime: '09:00',
-      location: 'Phòng họp A',
-      status: 'SCHEDULED',
-    };
-    setSchedules(prevSchedules => {
-      const updated = [...prevSchedules, newSchedule];
-      localStorage.setItem('reviewSchedules', JSON.stringify(updated));
-      return updated;
-    });
-    toast.success('Tạo lịch phản biện thành công!');
+    // TODO: Call API to create multiple schedules
+    console.log('Creating schedules:', scheduleForms);
+    toast.success(`Đã tạo ${scheduleForms.length} lịch phản biện thành công!`);
     setIsCreateModalOpen(false);
+    // Reset forms
+    setScheduleForms([{ scheduledDate: '', scheduledTime: '', location: '' }]);
+  };
+
+  const addScheduleForm = () => {
+    setScheduleForms([...scheduleForms, { scheduledDate: '', scheduledTime: '', location: '' }]);
+  };
+
+  const removeScheduleForm = (index: number) => {
+    if (scheduleForms.length > 1) {
+      setScheduleForms(scheduleForms.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateScheduleForm = (index: number, field: keyof ScheduleForm, value: any) => {
+    const updated = [...scheduleForms];
+    updated[index] = { ...updated[index], [field]: value };
+    setScheduleForms(updated);
+  };
+
+  const handleCreateCommittee = () => {
+    if (newCommittee.name) {
+      const committee: Committee = {
+        id: Date.now(),
+        name: newCommittee.name,
+        members: newCommittee.members,
+      };
+      setCommittees([...committees, committee]);
+      setNewCommittee({ name: '', members: [] });
+      setIsCreatingCommittee(false);
+      toast.success('Đã tạo hội đồng mới!');
+    }
+  };
+
+  const addCommitteeMember = () => {
+    setNewCommittee({
+      ...newCommittee,
+      members: [...newCommittee.members, { id: Date.now(), name: '', role: 'reviewer' }],
+    });
+  };
+
+  const removeCommitteeMember = (index: number) => {
+    setNewCommittee({
+      ...newCommittee,
+      members: newCommittee.members.filter((_, i) => i !== index),
+    });
+  };
+
+  const updateCommitteeMember = (index: number, field: keyof CommitteeMember, value: any) => {
+    const updated = [...newCommittee.members];
+    updated[index] = { ...updated[index], [field]: value };
+    setNewCommittee({ ...newCommittee, members: updated });
   };
 
   const handleEditSchedule = (e: React.FormEvent) => {
@@ -348,79 +374,225 @@ export function HeadReviewSchedule() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Tạo lịch phản biện mới"
-        size="lg"
+        size="xl"
       >
-        <form onSubmit={handleCreateSchedule} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Chọn đề tài</label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn đề tài khóa luận..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">KL2024-008 - Hệ thống IoT giám sát môi trường nông nghiệp</SelectItem>
-                <SelectItem value="2">KL2024-015 - Ứng dụng Blockchain trong quản lý chuỗi cung ứng</SelectItem>
-                <SelectItem value="3">KL2024-003 - Hệ thống nhận diện biển số xe thông minh</SelectItem>
-                <SelectItem value="4">KL2024-020 - Phát triển ứng dụng quản lý học tập trực tuyến</SelectItem>
-                <SelectItem value="5">KL2024-025 - Nghiên cứu và xây dựng chatbot hỗ trợ học tập</SelectItem>
-                <SelectItem value="6">KL2024-030 - Hệ thống quản lý kho hàng thông minh</SelectItem>
-                <SelectItem value="7">KL2024-035 - Ứng dụng AI trong phân tích dữ liệu y tế</SelectItem>
-                <SelectItem value="8">KL2024-040 - Xây dựng nền tảng thương mại điện tử</SelectItem>
-                <SelectItem value="9">KL2024-045 - Hệ thống quản lý tài chính cá nhân</SelectItem>
-                <SelectItem value="10">KL2024-050 - Nghiên cứu thuật toán nén dữ liệu</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Giảng viên phản biện 1</label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn giáo viên phản biện 1..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">TS. Hoàng Thị C</SelectItem>
-                <SelectItem value="2">PGS. TS. Trần Thị E</SelectItem>
-                <SelectItem value="3">TS. Lê Văn G</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Giảng viên phản biện 2</label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn giáo viên phản biện 2..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">TS. Hoàng Thị C</SelectItem>
-                <SelectItem value="2">PGS. TS. Trần Thị E</SelectItem>
-                <SelectItem value="3">TS. Lê Văn G</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Ngày phản biện</label>
-              <Input type="date" />
+        <form onSubmit={handleCreateSchedule} className="space-y-6">
+          {/* Committee Management */}
+          <div className="border border-border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Quản lý hội đồng phản biện
+              </h3>
+              <Button type="button" size="sm" onClick={() => setIsCreatingCommittee(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Tạo hội đồng mới
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Giờ bắt đầu</label>
-              <Input type="time" />
+
+            {isCreatingCommittee && (
+              <div className="bg-muted p-4 rounded-lg mb-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tên hội đồng</label>
+                  <Input
+                    value={newCommittee.name}
+                    onChange={(e) => setNewCommittee({ ...newCommittee, name: e.target.value })}
+                    placeholder="VD: Hội đồng 1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Thành viên</label>
+                  {newCommittee.members.map((member, index) => (
+                    <div key={member.id} className="flex gap-2 mb-2">
+                      <Input
+                        value={member.name}
+                        onChange={(e) => updateCommitteeMember(index, 'name', e.target.value)}
+                        placeholder="Tên giáo viên"
+                        className="flex-1"
+                      />
+                      <select
+                        value={member.role}
+                        onChange={(e) => updateCommitteeMember(index, 'role', e.target.value)}
+                        className="px-3 py-2 border border-input rounded-md"
+                      >
+                        <option value="reviewer">Phản biện</option>
+                        <option value="chairman">Chủ tịch</option>
+                        <option value="secretary">Thư ký</option>
+                      </select>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCommitteeMember(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button type="button" variant="ghost" size="sm" onClick={addCommitteeMember}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Thêm thành viên
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" onClick={handleCreateCommittee}>
+                    Lưu hội đồng
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setIsCreatingCommittee(false)}>
+                    Hủy
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {committees.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Chưa có hội đồng nào</p>
+              ) : (
+                committees.map((committee) => (
+                  <div key={committee.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div>
+                      <p className="font-medium">{committee.name}</p>
+                      <p className="text-xs text-muted-foreground">{committee.members.length} thành viên</p>
+                    </div>
+                    <Button type="button" variant="ghost" size="sm">
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Địa điểm</label>
-            <Input placeholder="VD: Phòng họp A - Tầng 3" />
+          {/* Schedule Forms */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Lịch phản biện</h3>
+              <Button type="button" size="sm" onClick={addScheduleForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm lịch
+              </Button>
+            </div>
+
+            {scheduleForms.map((form, index) => (
+              <div key={index} className="border border-border rounded-lg p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Lịch #{index + 1}</h4>
+                  {scheduleForms.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeScheduleForm(index)}
+                    >
+                      <X className="w-4 h-4 text-red-500" />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Chọn đề tài</label>
+                    <Select
+                      value={form.thesisId?.toString() || ''}
+                      onValueChange={(value) => updateScheduleForm(index, 'thesisId', Number(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn đề tài khóa luận..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {/* TODO: Load from API */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Chọn hội đồng</label>
+                    <Select
+                      value={form.committeeId?.toString() || ''}
+                      onValueChange={(value) => updateScheduleForm(index, 'committeeId', Number(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn hội đồng phản biện..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {committees.map((committee) => (
+                          <SelectItem key={committee.id} value={committee.id.toString()}>
+                            {committee.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Giảng viên phản biện 1</label>
+                    <Select
+                      value={form.reviewer1 || ''}
+                      onValueChange={(value) => updateScheduleForm(index, 'reviewer1', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giáo viên phản biện 1..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {/* TODO: Load from API */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Giảng viên phản biện 2</label>
+                    <Select
+                      value={form.reviewer2 || ''}
+                      onValueChange={(value) => updateScheduleForm(index, 'reviewer2', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giáo viên phản biện 2..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {/* TODO: Load from API */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Ngày phản biện</label>
+                    <Input
+                      type="date"
+                      value={form.scheduledDate}
+                      onChange={(e) => updateScheduleForm(index, 'scheduledDate', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Giờ bắt đầu</label>
+                    <Input
+                      type="time"
+                      value={form.scheduledTime}
+                      onChange={(e) => updateScheduleForm(index, 'scheduledTime', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Địa điểm</label>
+                    <Input
+                      placeholder="VD: Phòng họp A - Tầng 3"
+                      value={form.location}
+                      onChange={(e) => updateScheduleForm(index, 'location', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button variant="ghost" type="button" onClick={() => setIsCreateModalOpen(false)}>
               Hủy
             </Button>
-            <Button type="submit">Tạo lịch</Button>
+            <Button type="submit">Tạo {scheduleForms.length} lịch</Button>
           </div>
         </form>
       </Modal>
@@ -446,9 +618,7 @@ export function HeadReviewSchedule() {
                 <SelectValue placeholder={editingSchedule?.reviewer || "Chọn giáo viên phản biện 1..."} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">TS. Hoàng Thị C</SelectItem>
-                <SelectItem value="2">PGS. TS. Trần Thị E</SelectItem>
-                <SelectItem value="3">TS. Lê Văn G</SelectItem>
+                {/* TODO: Load from API */}
               </SelectContent>
             </Select>
           </div>
@@ -460,9 +630,7 @@ export function HeadReviewSchedule() {
                 <SelectValue placeholder="Chọn giáo viên phản biện 2..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">TS. Hoàng Thị C</SelectItem>
-                <SelectItem value="2">PGS. TS. Trần Thị E</SelectItem>
-                <SelectItem value="3">TS. Lê Văn G</SelectItem>
+                {/* TODO: Load from API */}
               </SelectContent>
             </Select>
           </div>

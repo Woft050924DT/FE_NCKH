@@ -46,6 +46,14 @@ export function MyTopics() {
     fetchTopics();
   }, [selectedRoundId]);
 
+  useEffect(() => {
+    if (isCreateModalOpen && selectedRoundId) {
+      setFormData(prev => ({ ...prev, thesis_round_id: selectedRoundId }));
+    } else if (isCreateModalOpen && thesisRounds.length > 0) {
+      setFormData(prev => ({ ...prev, thesis_round_id: thesisRounds[0].id }));
+    }
+  }, [isCreateModalOpen, selectedRoundId, thesisRounds]);
+
   const fetchThesisRounds = async () => {
     console.log('Calling API: /api/instructor/thesis-rounds');
     try {
@@ -398,15 +406,26 @@ export function MyTopics() {
                 onChange={(e) => setFormData({ ...formData, topic_title: e.target.value })}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Đợt khóa luận ID</label>
-              <Input
-                type="number"
-                required
-                value={formData.thesis_round_id}
-                onChange={(e) => setFormData({ ...formData, thesis_round_id: parseInt(e.target.value) })}
-              />
-            </div>
+            {!selectedRoundId && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Đợt khóa luận</label>
+                <Select
+                  value={formData.thesis_round_id?.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, thesis_round_id: parseInt(value) })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn đợt khóa luận..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {thesisRounds.map((round) => (
+                      <SelectItem key={round.id} value={round.id.toString()}>
+                        {round.round_name} ({round.round_code || `DK${round.id}`}) - {round.academic_year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div>

@@ -1,4 +1,4 @@
-import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus, GraduationCap, Clock } from 'lucide-react';
+import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus, GraduationCap, Clock, Library } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { cn } from '../../../utils/cn';
 import { Avatar } from '../ui/Avatar';
@@ -17,6 +17,7 @@ const menuItems = {
     { icon: FileText, label: 'Đề tài', path: '/topic-registration' },
     { icon: ClipboardList, label: 'Báo cáo tuần', path: '/reports' },
     { icon: BookOpen, label: 'Điểm số', path: '/scores' },
+    { icon: Library, label: 'Khóa học', path: '/courses' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
   ],
   instructor: [
@@ -26,6 +27,7 @@ const menuItems = {
     { icon: GraduationCap, label: 'Chấm điểm', path: '/grading' },
     { icon: ClipboardList, label: 'Báo cáo', path: '/reports' },
     { icon: CheckSquare, label: 'Lịch phản biện', path: '/reviews' },
+    { icon: Library, label: 'Khóa học', path: '/instructor-courses' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
   ],
   head: [
@@ -35,6 +37,7 @@ const menuItems = {
     { icon: FileText, label: 'Duyệt đề tài', path: '/approve-topics' },
     { icon: Clock, label: 'Lịch phản biện', path: '/review-schedule' },
     { icon: Shield, label: 'Hội đồng', path: '/councils' },
+    { icon: Library, label: 'Quản lý khóa học', path: '/manage-courses' },
     { icon: ClipboardList, label: 'Báo cáo', path: '/reports' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
   ],

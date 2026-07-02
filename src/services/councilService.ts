@@ -13,7 +13,7 @@ export const councilService = {
    * POST /api/councils
    */
   async createCouncil(data: CreateCouncilRequest): Promise<Council> {
-    return apiClient.post<Council>('/api/councils', data, false);
+    return apiClient.post<Council>('/api/councils', data);
   },
 
   /**

@@ -35,7 +35,6 @@ export const studentService = {
   /**
    * Get all classes
    * GET /api/students/classes
-   * Public endpoint - no authentication required
    */
   async getClasses(params?: GetClassesParams): Promise<StudentClass[]> {
     const queryParams = new URLSearchParams();
@@ -56,7 +55,6 @@ export const studentService = {
   /**
    * Get class by ID with students
    * GET /api/students/classes/:id
-   * Public endpoint - no authentication required
    */
   async getClassById(id: number): Promise<StudentClassDetail> {
     return apiClient.get<StudentClassDetail>(`/api/students/classes/${id}`);

@@ -82,6 +82,9 @@ export function ThesisRounds() {
     notes: '',
     facultyId: 1,
     departmentId: 1,
+    defaultGroupMode: 'BOTH',
+    defaultMinMembers: 1,
+    defaultMaxMembers: 1,
   });
 
   // Fetch thesis rounds on component mount
@@ -114,7 +117,7 @@ export function ThesisRounds() {
     const { name, value } = e.target;
     setEditFormData(prev => ({
       ...prev,
-      [name]: name === 'semester' || name === 'thesisTypeId' || name === 'facultyId' || name === 'departmentId' ? Number(value) : value,
+      [name]: name === 'semester' || name === 'thesisTypeId' || name === 'facultyId' || name === 'departmentId' || name === 'defaultMinMembers' || name === 'defaultMaxMembers' ? Number(value) : value,
     }));
   };
 
@@ -134,6 +137,9 @@ export function ThesisRounds() {
       notes: round.notes || '',
       facultyId: round.faculty_id || 1,
       departmentId: round.department_id || 1,
+      defaultGroupMode: round.thesis_round_rules?.default_group_mode || 'BOTH',
+      defaultMinMembers: round.thesis_round_rules?.default_min_members || 1,
+      defaultMaxMembers: round.thesis_round_rules?.default_max_members || 1,
     });
     setIsEditModalOpen(true);
   };
@@ -724,6 +730,57 @@ export function ThesisRounds() {
                   value={editFormData.notes}
                   onChange={handleEditInputChange}
                   placeholder="Ghi chú về đợt khóa luận..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Quy định nhóm */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="font-semibold text-lg text-foreground">Quy định nhóm</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Chế độ làm <span className="text-destructive">*</span>
+                </label>
+                <select
+                  name="defaultGroupMode"
+                  value={editFormData.defaultGroupMode}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                  required
+                >
+                  <option value="BOTH">Cho phép cả hai</option>
+                  <option value="GROUP_ONLY">Chỉ làm Nhóm</option>
+                  <option value="INDIVIDUAL_ONLY">Chỉ làm Cá nhân</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Tối thiểu (SV) <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="defaultMinMembers"
+                  type="number"
+                  min="1"
+                  value={editFormData.defaultMinMembers}
+                  onChange={handleEditInputChange}
+                  disabled={editFormData.defaultGroupMode === 'INDIVIDUAL_ONLY'}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Tối đa (SV) <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  name="defaultMaxMembers"
+                  type="number"
+                  min="1"
+                  value={editFormData.defaultMaxMembers}
+                  onChange={handleEditInputChange}
+                  disabled={editFormData.defaultGroupMode === 'INDIVIDUAL_ONLY'}
+                  required
                 />
               </div>
             </div>

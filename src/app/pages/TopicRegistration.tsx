@@ -82,7 +82,7 @@ export function TopicRegistration() {
 
         // Get proposed topics for the selected round
         try {
-          const topics = await topicRegistrationService.getProposedTopics(selectedRound);
+          const topics = await topicRegistrationService.getProposedTopics(selectedRound.id);
           setProposedTopics(topics.map((t: any) => ({
             id: t.id,
             code: t.topic_code,
@@ -102,7 +102,7 @@ export function TopicRegistration() {
         // Get instructors from API
         console.log('Fetching instructors for thesis round:', selectedRound);
         try {
-          const instructorsData = await instructorService.getInstructors({ thesis_round_id: selectedRound });
+          const instructorsData = await instructorService.getInstructors({ thesis_round_id: selectedRound.id });
           console.log('Instructors fetched:', instructorsData);
           console.log('Number of instructors:', instructorsData?.length || 0);
           const mappedInstructors = instructorsData.map((instructor: any) => ({

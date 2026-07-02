@@ -33,11 +33,12 @@ export function WeeklyReports() {
       try {
         const response = await thesisRoundsService.getThesisRoundsForStudent();
         const rounds = response.success ? response.data : [];
-        setThesisRounds(rounds);
+        const ongoingRounds = rounds.filter((r: any) => r.status?.toUpperCase() === 'ONGOING' || r.status?.toUpperCase() === 'IN PROGRESS');
+        setThesisRounds(ongoingRounds);
         
         // Auto-select the first active round if available
-        if (rounds.length > 0 && !selectedRound) {
-          setSelectedRound(rounds[0].id);
+        if (ongoingRounds.length > 0 && !selectedRound) {
+          setSelectedRound(ongoingRounds[0].id);
         }
       } catch (error) {
         console.error('Error fetching thesis rounds:', error);

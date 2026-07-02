@@ -60,7 +60,7 @@ export function Sidebar({ userRole = 'student', userName = 'Nguyễn Văn A', us
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
     }

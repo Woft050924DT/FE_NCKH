@@ -33,8 +33,17 @@ export const authService = {
    */
   async logout(): Promise<LogoutResponse | null> {
     try {
+<<<<<<< HEAD
       const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/v1/auth/logout', undefined, false);
       return response.data;
+=======
+      // Send auth token to backend so it can log req.user.id
+      const response = await apiClient.post<{ success: boolean; data: LogoutResponse; message: string }>('/api/auth/logout', undefined, true);
+      return response.data;
+    } catch (error) {
+      console.error('Logout API failed:', error);
+      return null;
+>>>>>>> d85a178b9f0c8ea7a8a13a86ef362002d7ec7f6f
     } finally {
       // Clear token and user from localStorage regardless of API success
       localStorage.removeItem('token');
@@ -68,7 +77,14 @@ export const authService = {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        return JSON.parse(userStr);
+        const user = JSON.parse(userStr);
+        if (user && user.role) {
+          user.role = user.role.toLowerCase();
+        }
+        if (user && user.roles) {
+          user.roles = user.roles.map((r: string) => r.toLowerCase());
+        }
+        return user;
       } catch {
         return null;
       }

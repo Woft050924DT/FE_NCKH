@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { authService } from '../services/authService';
 import type { User, Profile, LoginRequest, UserRole } from '../services/types';
 
@@ -60,7 +66,9 @@ const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Check for stored user on mount
     const storedUser = authService.getStoredUser();
     const storedToken = authService.getToken();
-    
+
     if (storedUser && storedToken) {
       setUser(storedUser);
     }
@@ -82,12 +90,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const response = await authService.login(credentials);
     console.log('Login response user:', response.user);
     console.log('User role:', response.user?.role);
-    
+
     // Validate role
     if (response.user?.role && !ROLE_PERMISSIONS[response.user.role]) {
       throw new Error(`Invalid role: ${response.user.role}`);
     }
-    
+
     setUser(response.user);
     await refreshProfile();
   };
@@ -129,13 +137,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const hasPermission = (permission: string): boolean => {
     if (!user?.role) return false;
     const permissions = ROLE_PERMISSIONS[user.role] || [];
-    return permissions.includes(permission) || permissions.includes('full_access');
+    return (
+      permissions.includes(permission) || permissions.includes('full_access')
+    );
   };
 
   // Check if user can access based on required roles
   const canAccess = (requiredRoles: UserRole | UserRole[]): boolean => {
     if (!user?.role) return false;
-    const rolesArray = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+    const rolesArray = Array.isArray(requiredRoles)
+      ? requiredRoles
+      : [requiredRoles];
     return rolesArray.includes(user.role);
   };
 

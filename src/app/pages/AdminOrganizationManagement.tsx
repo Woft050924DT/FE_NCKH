@@ -1,25 +1,61 @@
 import { useEffect, useState } from 'react';
 import { Building2, Plus, Edit, Trash2, ChevronRight } from 'lucide-react';
 import { PageLayout } from '../components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { adminService } from '../../services/adminService';
 import type { Faculty, Department, Class } from '../../services/types';
 
 export function AdminOrganizationManagement() {
-  const [activeTab, setActiveTab] = useState<'faculties' | 'departments' | 'classes'>('faculties');
+  const [activeTab, setActiveTab] = useState<
+    'faculties' | 'departments' | 'classes'
+  >('faculties');
   const [loading, setLoading] = useState(true);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedFaculty, setSelectedFaculty] = useState<number | null>(null);
-  const [selectedDepartment, setSelectedDepartment] = useState<number | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<number | null>(
+    null,
+  );
+  // State xử lý Modal (Hộp thoại Form)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
 
   useEffect(() => {
     fetchData();
   }, [activeTab, selectedFaculty, selectedDepartment]);
 
+  const [formData, setFormData] = useState({
+    faculty_code: '',
+    faculty_name: '',
+    address: '',
+    phone: '',
+    email: '',
+    dean_id: '',
+    status: true,
+  });
+  const handleOpenAddModal = () => {
+    setModalMode('add');
+    setFormData({
+      faculty_code: '',
+      faculty_name: '',
+      address: '',
+      phone: '',
+      email: '',
+      dean_id: '',
+      status: true,
+    });
+    setIsModalOpen(true);
+  };
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -30,13 +66,13 @@ export function AdminOrganizationManagement() {
           break;
         case 'departments':
           const departmentsData = await adminService.getDepartments(
-            selectedFaculty ? { faculty_id: selectedFaculty } : undefined
+            selectedFaculty ? { faculty_id: selectedFaculty } : undefined,
           );
           setDepartments(departmentsData);
           break;
         case 'classes':
           const classesData = await adminService.getClasses(
-            selectedDepartment ? { major_id: selectedDepartment } : undefined
+            selectedDepartment ? { major_id: selectedDepartment } : undefined,
           );
           setClasses(classesData);
           break;
@@ -97,24 +133,49 @@ export function AdminOrganizationManagement() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Mã khoa</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Tên khoa</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Địa chỉ</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Email</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Số bộ môn</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Trạng thái</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Thao tác</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Mã khoa
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Tên khoa
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Địa chỉ
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Email
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Số bộ môn
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Trạng thái
+                </th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody>
               {faculties.map((faculty) => (
-                <tr key={faculty.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                  <td className="py-3 px-4 font-medium">{faculty.faculty_code}</td>
+                <tr
+                  key={faculty.id}
+                  className="border-b border-border hover:bg-muted/50 transition-colors"
+                >
+                  <td className="py-3 px-4 font-medium">
+                    {faculty.faculty_code}
+                  </td>
                   <td className="py-3 px-4">{faculty.faculty_name}</td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">{faculty.address || '-'}</td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">{faculty.email || '-'}</td>
+                  <td className="py-3 px-4 text-sm text-muted-foreground">
+                    {faculty.address || '-'}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-muted-foreground">
+                    {faculty.email || '-'}
+                  </td>
                   <td className="py-3 px-4">
-                    <Badge variant="secondary">{faculty.departments?.length || 0}</Badge>
+                    <Badge variant="secondary">
+                      {faculty.departments?.length || 0}
+                    </Badge>
                   </td>
                   <td className="py-3 px-4">
                     <Badge variant={faculty.status ? 'default' : 'secondary'}>
@@ -125,7 +186,11 @@ export function AdminOrganizationManagement() {
                     <Button size="sm" variant="ghost" className="mr-2">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteFaculty(faculty.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteFaculty(faculty.id)}
+                    >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </td>
@@ -144,7 +209,9 @@ export function AdminOrganizationManagement() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Quản lý Bộ môn</CardTitle>
-            <CardDescription>Danh sách các bộ môn trong hệ thống</CardDescription>
+            <CardDescription>
+              Danh sách các bộ môn trong hệ thống
+            </CardDescription>
           </div>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
@@ -154,11 +221,15 @@ export function AdminOrganizationManagement() {
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Lọc theo khoa:</label>
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+            Lọc theo khoa:
+          </label>
           <select
             className="w-full max-w-xs px-3 py-2 border border-border rounded-md"
             value={selectedFaculty || ''}
-            onChange={(e) => setSelectedFaculty(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) =>
+              setSelectedFaculty(e.target.value ? Number(e.target.value) : null)
+            }
           >
             <option value="">Tất cả các khoa</option>
             {faculties.map((faculty) => (
@@ -172,22 +243,43 @@ export function AdminOrganizationManagement() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Mã bộ môn</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Tên bộ môn</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Khoa</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Số giảng viên</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Trạng thái</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Thao tác</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Mã bộ môn
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Tên bộ môn
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Khoa
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Số giảng viên
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Trạng thái
+                </th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody>
               {departments.map((dept) => (
-                <tr key={dept.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                  <td className="py-3 px-4 font-medium">{dept.department_code}</td>
+                <tr
+                  key={dept.id}
+                  className="border-b border-border hover:bg-muted/50 transition-colors"
+                >
+                  <td className="py-3 px-4 font-medium">
+                    {dept.department_code}
+                  </td>
                   <td className="py-3 px-4">{dept.department_name}</td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">{dept.faculties?.faculty_name || '-'}</td>
+                  <td className="py-3 px-4 text-sm text-muted-foreground">
+                    {dept.faculties?.faculty_name || '-'}
+                  </td>
                   <td className="py-3 px-4">
-                    <Badge variant="secondary">{dept.instructors?.length || 0}</Badge>
+                    <Badge variant="secondary">
+                      {dept.instructors?.length || 0}
+                    </Badge>
                   </td>
                   <td className="py-3 px-4">
                     <Badge variant={dept.status ? 'default' : 'secondary'}>
@@ -198,7 +290,11 @@ export function AdminOrganizationManagement() {
                     <Button size="sm" variant="ghost" className="mr-2">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteDepartment(dept.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteDepartment(dept.id)}
+                    >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </td>
@@ -217,7 +313,9 @@ export function AdminOrganizationManagement() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Quản lý Lớp học</CardTitle>
-            <CardDescription>Danh sách các lớp học trong hệ thống</CardDescription>
+            <CardDescription>
+              Danh sách các lớp học trong hệ thống
+            </CardDescription>
           </div>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
@@ -227,11 +325,17 @@ export function AdminOrganizationManagement() {
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Lọc theo bộ môn:</label>
+          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+            Lọc theo bộ môn:
+          </label>
           <select
             className="w-full max-w-xs px-3 py-2 border border-border rounded-md"
             value={selectedDepartment || ''}
-            onChange={(e) => setSelectedDepartment(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) =>
+              setSelectedDepartment(
+                e.target.value ? Number(e.target.value) : null,
+              )
+            }
           >
             <option value="">Tất cả các bộ môn</option>
             {departments.map((dept) => (
@@ -245,21 +349,40 @@ export function AdminOrganizationManagement() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Mã lớp</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Tên lớp</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Chuyên ngành</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Năm học</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Số sinh viên</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Trạng thái</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Thao tác</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Mã lớp
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Tên lớp
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Chuyên ngành
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Năm học
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Số sinh viên
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Trạng thái
+                </th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody>
               {classes.map((cls) => (
-                <tr key={cls.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                <tr
+                  key={cls.id}
+                  className="border-b border-border hover:bg-muted/50 transition-colors"
+                >
                   <td className="py-3 px-4 font-medium">{cls.class_code}</td>
                   <td className="py-3 px-4">{cls.class_name}</td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">{cls.majors?.major_name || '-'}</td>
+                  <td className="py-3 px-4 text-sm text-muted-foreground">
+                    {cls.majors?.major_name || '-'}
+                  </td>
                   <td className="py-3 px-4">{cls.academic_year || '-'}</td>
                   <td className="py-3 px-4">
                     <Badge variant="outline">{cls.student_count}</Badge>
@@ -273,7 +396,11 @@ export function AdminOrganizationManagement() {
                     <Button size="sm" variant="ghost" className="mr-2">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDeleteClass(cls.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteClass(cls.id)}
+                    >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </td>

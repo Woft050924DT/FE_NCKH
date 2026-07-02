@@ -14,14 +14,19 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleDemoLogin = (role: 'student' | 'instructor' | 'head' | 'admin') => {
+  const handleDemoLogin = (
+    role: 'student' | 'instructor' | 'head' | 'admin',
+  ) => {
     localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('user', JSON.stringify({
-      id: 1,
-      email: 'demo@example.com',
-      fullName: 'Demo User',
-      role: role
-    }));
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: 1,
+        email: 'demo@example.com',
+        fullName: 'Demo User',
+        role: role,
+      }),
+    );
     navigate('/dashboard');
   };
 
@@ -65,12 +70,22 @@ export function Login() {
               <BookOpen className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>ThesisHub</h1>
-              <p className="text-blue-200 text-sm">Nền tảng quản lý khóa luận</p>
+              <h1
+                className="text-3xl font-bold"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                ThesisHub
+              </h1>
+              <p className="text-blue-200 text-sm">
+                Nền tảng quản lý khóa luận
+              </p>
             </div>
           </div>
 
-          <h2 className="text-2xl font-semibold mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
+          <h2
+            className="text-2xl font-semibold mb-4"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
             Quản lý hành trình nghiên cứu của bạn
           </h2>
 
@@ -91,7 +106,10 @@ export function Login() {
       <div className="flex-1 flex items-center justify-center p-12 bg-background">
         <div className="w-full max-w-md">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
               Chào mừng trở lại
             </h2>
             <p className="text-muted-foreground">
@@ -145,12 +163,20 @@ export function Login() {
                 id="remember"
                 className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
               />
-              <label htmlFor="remember" className="ml-2 text-sm text-foreground">
+              <label
+                htmlFor="remember"
+                className="ml-2 text-sm text-foreground"
+              >
                 Ghi nhớ đăng nhập
               </label>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={loading}
+            >
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
 
@@ -162,18 +188,40 @@ export function Login() {
           </form>
 
           <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-900 font-medium mb-2">Demo - Chọn vai trò (chỉ dùng cho test):</p>
+            <p className="text-sm text-blue-900 font-medium mb-2">
+              Demo - Chọn vai trò (chỉ dùng cho test):
+            </p>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('student')} disabled={loading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDemoLogin('student')}
+                disabled={loading}
+              >
                 Sinh viên
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('instructor')} disabled={loading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDemoLogin('instructor')}
+                disabled={loading}
+              >
                 Giảng viên
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('head')} disabled={loading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDemoLogin('head')}
+                disabled={loading}
+              >
                 Trưởng BM
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDemoLogin('admin')} disabled={loading}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDemoLogin('admin')}
+                disabled={loading}
+              >
                 Admin
               </Button>
             </div>

@@ -33,7 +33,7 @@ export const thesisGroupsService = {
    * Get thesis group by ID
    * GET /api/thesis-groups/:id
    */
-  async getThesisGroupById(id: string): Promise<ThesisGroup> {
+  async getThesisGroupById(id: string | number): Promise<ThesisGroup> {
     return apiClient.get<ThesisGroup>(`/api/thesis-groups/${id}`);
   },
 
@@ -41,7 +41,7 @@ export const thesisGroupsService = {
    * Update thesis group
    * PUT /api/thesis-groups/:id
    */
-  async updateThesisGroup(id: string, data: Partial<CreateThesisGroupRequest>): Promise<ThesisGroup> {
+  async updateThesisGroup(id: string | number, data: Partial<CreateThesisGroupRequest> | any): Promise<ThesisGroup> {
     return apiClient.put<ThesisGroup>(`/api/thesis-groups/${id}`, data);
   },
 
@@ -98,21 +98,6 @@ export const thesisGroupsService = {
     return apiClient.post<any>('/api/thesis-groups/leave', { student_id: studentId, thesis_group_id: thesisGroupId });
   },
 
-  /**
-   * Get thesis group by ID
-   * GET /api/thesis-groups/:id
-   */
-  async getThesisGroupById(id: number): Promise<ThesisGroup> {
-    return apiClient.get<ThesisGroup>(`/api/thesis-groups/${id}`);
-  },
-
-  /**
-   * Update thesis group (Student only)
-   * PUT /api/thesis-groups/:id
-   */
-  async updateThesisGroup(id: number, data: any): Promise<ThesisGroup> {
-    return apiClient.put<ThesisGroup>(`/api/thesis-groups/${id}`, data);
-  },
 
   /**
    * Lock thesis group (Student only)
@@ -126,8 +111,8 @@ export const thesisGroupsService = {
    * Dissolve thesis group (Student only)
    * PUT /api/thesis-groups/:id/dissolve
    */
-  async dissolveThesisGroup(id: number): Promise<any> {
-    return apiClient.put<any>(`/api/thesis-groups/${id}/dissolve`);
+  async dissolveThesisGroup(id: number, studentId: number, dissolutionReason: string = ''): Promise<any> {
+    return apiClient.put<any>(`/api/thesis-groups/${id}/dissolve`, { student_id: studentId, dissolution_reason: dissolutionReason });
   },
 
   /**

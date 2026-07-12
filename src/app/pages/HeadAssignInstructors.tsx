@@ -362,10 +362,13 @@ export function HeadAssignInstructors() {
 
           });
 
-
-          setInstructors(data);
-
-
+          let instructorsArray: any[] = [];
+          if (Array.isArray(data)) {
+            instructorsArray = data;
+          } else if (data && data.data && Array.isArray(data.data)) {
+            instructorsArray = data.data;
+          }
+          setInstructors(instructorsArray);
         } catch (err: any) {
 
 
@@ -400,26 +403,13 @@ export function HeadAssignInstructors() {
 
 
   const filteredInstructors = instructors.filter(instructor => {
-
-
     const searchLower = searchTerm.toLowerCase();
 
-
     return (
-
-
-      instructor.users.full_name.toLowerCase().includes(searchLower) ||
-
-
-      instructor.instructor_code.toLowerCase().includes(searchLower) ||
-
-
-      (instructor.specialization && instructor.specialization.toLowerCase().includes(searchLower))
-
-
+      (instructor.users?.full_name || '').toLowerCase().includes(searchLower) ||
+      (instructor.instructor_code || '').toLowerCase().includes(searchLower) ||
+      (instructor.specialization || '').toLowerCase().includes(searchLower)
     );
-
-
   });
 
 

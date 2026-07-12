@@ -38,8 +38,7 @@ export function StudentDashboard() {
       setIsSubmitting(true);
       // Assume thesis_id from topicData or groupData
       const thesisId = topicData?.id || groupData?.id || 1;
-      
-      await reportService.createWeeklyReport({
+      await reportService.createWeeklyReport(thesisId, {
         thesis_id: thesisId,
         week_number: parseInt(reportForm.week_number),
         report_content: reportForm.report_content,
@@ -109,6 +108,8 @@ export function StudentDashboard() {
           console.error('Error fetching groups:', e);
         }
 
+        let currentThesisId: number | undefined;
+
         // Get topic registrations
         try {
           console.log('Fetching topic registrations...');
@@ -116,7 +117,9 @@ export function StudentDashboard() {
           console.log('Topic registrations fetched:', registrations);
           if (registrations && registrations.length > 0) {
             const activeRegistration = registrations[0];
+            currentThesisId = activeRegistration.theses?.id;
             setTopicData({
+              id: activeRegistration.theses?.id,
               title: activeRegistration.proposed_topics?.topic_title || activeRegistration.self_proposed_title,
               supervisor: activeRegistration.proposed_topics?.instructors?.users?.full_name || '',
               supervisorAvatar: '',
@@ -140,9 +143,10 @@ export function StudentDashboard() {
         }
 
         // Get weekly reports
-        try {
-          const reports = await reportService.getWeeklyReports();
-          console.log('Weekly reports fetched:', reports);
+        if (currentThesisId) {
+          try {
+            const reports = await reportService.getWeeklyReports(currentThesisId);
+            console.log('Weekly reports fetched:', reports);
           if (reports && reports.length > 0) {
             const latestReport = reports[0];
             setWeeklyProgress({
@@ -154,13 +158,15 @@ export function StudentDashboard() {
           } else {
             console.log('No weekly reports found');
           }
-        } catch (e) {
-          console.error('Error fetching reports:', e);
+          } catch (e) {
+            console.error('Error fetching reports:', e);
+          }
         }
 
         // Get thesis tasks
-        try {
-          const thesisTasks = await reportService.getThesisTasks();
+        if (currentThesisId) {
+          try {
+            const thesisTasks = await reportService.getThesisTasks(currentThesisId);
           setTasks((thesisTasks || []).map((task: any) => ({
             id: task.id,
             name: task.task_name,
@@ -168,9 +174,10 @@ export function StudentDashboard() {
             dueDate: new Date(task.due_date).toLocaleDateString('vi-VN'),
             status: task.status,
             progress: task.status === 'COMPLETED' ? 100 : task.status === 'IN_PROGRESS' ? 50 : 0,
-          })));
-        } catch (e) {
-          console.error('Error fetching tasks:', e);
+            })));
+          } catch (e) {
+            console.error('Error fetching tasks:', e);
+          }
         }
 
 

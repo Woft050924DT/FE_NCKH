@@ -82,7 +82,7 @@ export function TopicRegistration() {
 
         // Get proposed topics for the selected round
         try {
-          const topics = await topicRegistrationService.getProposedTopics(selectedRound.id);
+          const topics = await topicRegistrationService.getProposedTopics(selectedRound);
           setProposedTopics(topics.map((t: any) => ({
             id: t.id,
             code: t.topic_code,
@@ -93,7 +93,7 @@ export function TopicRegistration() {
             minMembers: t.proposed_topic_rules?.min_members || 1,
             maxMembers: t.proposed_topic_rules?.max_members || 1,
             isTaken: t.is_taken,
-            instructorId: t.instructors?.id,
+            instructorId: t.instructor_id || t.instructors?.id,
           })));
         } catch (e) {
           console.error('Error fetching topics:', e);
@@ -102,24 +102,29 @@ export function TopicRegistration() {
         // Get instructors from API
         console.log('Fetching instructors for thesis round:', selectedRound);
         try {
-          const instructorsData = await instructorService.getInstructors({ thesis_round_id: selectedRound.id });
-          console.log('Instructors fetched:', instructorsData);
-          console.log('Number of instructors:', instructorsData?.length || 0);
-          const mappedInstructors = instructorsData.map((instructor: any) => ({
-            id: instructor.id,
-            instructorCode: instructor.instructor_code || '',
-            name: instructor.users?.full_name || 'Unknown',
-            degree: instructor.academic_title || instructor.degree || 'Giảng viên',
-            specialization: instructor.specialization || '',
-            currentLoad: instructor.instructor_assignments?.[0]?.current_load || 0,
-            quota: instructor.instructor_assignments?.[0]?.supervision_quota || 0,
-            department: instructor.departments_instructors_department_idTodepartments?.department_name || '',
-            email: instructor.users?.email || '',
-            phone: instructor.users?.phone || '',
-            yearsOfExperience: instructor.years_of_experience || 0,
-            avatar: instructor.users?.avatar || '',
-            status: instructor.status || true,
-          }));
+          const assignmentsData = await thesisRoundsService.getInstructorAssignments(selectedRound);
+          // apiClient.get unwraps { data: ... } automatically if present, but just in case:
+          const assignments = Array.isArray(assignmentsData) ? assignmentsData : (assignmentsData as any).data || [];
+          console.log('Instructors assignments fetched:', assignments);
+          
+          const mappedInstructors = assignments.map((assignment: any) => {
+            const instructor = assignment.instructors || {};
+            return {
+              id: instructor.id || assignment.instructor_id,
+              instructorCode: instructor.instructor_code || '',
+              name: instructor.users?.full_name || 'Unknown',
+              degree: instructor.academic_title || instructor.degree || 'Giảng viên',
+              specialization: instructor.specialization || '',
+              currentLoad: assignment.current_load || 0,
+              quota: assignment.supervision_quota || 0,
+              department: instructor.departments_instructors_department_idTodepartments?.department_name || instructor.department?.department_name || '',
+              email: instructor.users?.email || '',
+              phone: instructor.users?.phone || '',
+              yearsOfExperience: instructor.years_of_experience || 0,
+              avatar: instructor.users?.avatar || '',
+              status: instructor.status !== false,
+            };
+          });
           console.log('Mapped instructors:', mappedInstructors);
           setInstructors(mappedInstructors);
           setFilteredInstructors(mappedInstructors);
@@ -451,6 +456,15 @@ export function TopicRegistration() {
                 )}
               </>
             )}
+
+            {selectedRound && selectedInstructor && (
+              <div className="mt-6 flex justify-end">
+                <Button onClick={handleNext}>
+                  Tiếp tục chọn đề tài
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -472,7 +486,7 @@ export function TopicRegistration() {
               </Card>
 
               <div className="space-y-4">
-                {proposedTopics.map((topic) => (
+                {proposedTopics.filter(t => t.instructorId === selectedInstructor).map((topic) => (
                   <Card
                     key={topic.id}
                     className={`cursor-pointer transition-all ${

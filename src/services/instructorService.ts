@@ -17,7 +17,7 @@ export const instructorService = {
     if (params?.department_id) queryParams.append('department_id', params.department_id.toString());
     
     const queryString = queryParams.toString();
-    return apiClient.get<any[]>(`/api/instructors${queryString ? `?${queryString}` : ''}`);
+    return apiClient.get<any[]>(`/api/v1/instructors${queryString ? `?${queryString}` : ''}`);
   },
 
   /**
@@ -26,7 +26,7 @@ export const instructorService = {
    * No authentication required
    */
   async getInstructorById(id: number): Promise<any> {
-    return apiClient.get<any>(`/api/instructors/${id}`);
+    return apiClient.get<any>(`/api/v1/instructors/${id}`);
   },
 
   /**
@@ -35,7 +35,7 @@ export const instructorService = {
    * No authentication required
    */
   async getInstructorByUserId(userId: number): Promise<any> {
-    return apiClient.get<any>(`/api/instructors/by-user/${userId}`);
+    return apiClient.get<any>(`/api/v1/instructors/by-user/${userId}`);
   },
 
   /**
@@ -56,7 +56,7 @@ export const instructorService = {
     full_name: string;
     phone: string;
   }): Promise<any> {
-    return apiClient.post<any>(`/api/instructors`, data);
+    return apiClient.post<any>(`/api/v1/instructors`, data);
   },
 
   /**
@@ -65,7 +65,7 @@ export const instructorService = {
    * Authentication required
    */
   async getActiveThesisRounds(): Promise<any[]> {
-    return apiClient.get<any[]>(`/api/instructors/thesis-rounds/active`, true);
+    return apiClient.get<any[]>(`/api/v1/instructors/thesis-rounds/active`, true);
   },
 
   /**
@@ -86,7 +86,7 @@ export const instructorService = {
     
     const queryString = queryParams.toString();
     return apiClient.get<any[]>(
-      `/api/instructors/${instructorId}/supervised-students${queryString ? `?${queryString}` : ''}`,
+      `/api/v1/instructors/${instructorId}/supervised-students${queryString ? `?${queryString}` : ''}`,
       true
     );
   },

@@ -21,7 +21,7 @@ export const reportService = {
    * POST /api/thesis-tasks
    */
   async createThesisTask(data: CreateThesisTaskRequest): Promise<ThesisTask> {
-    return apiClient.post<ThesisTask>('/api/thesis-tasks', data);
+    return apiClient.post<ThesisTask>('/api/v1/thesis/student/reports/tasks', data);
   },
 
   /**
@@ -29,24 +29,23 @@ export const reportService = {
    * PUT /api/thesis-tasks/:id
    */
   async updateThesisTask(id: number, data: UpdateThesisTaskRequest): Promise<ThesisTask> {
-    return apiClient.put<ThesisTask>(`/api/thesis-tasks/${id}`, data);
+    return apiClient.put<ThesisTask>(`/api/v1/thesis/student/reports/tasks/${id}`, data);
   },
 
   /**
    * Get thesis tasks
    * GET /api/thesis-tasks
    */
-  async getThesisTasks(thesisId?: number): Promise<ThesisTask[]> {
-    const queryParams = thesisId ? `?thesis_id=${thesisId}` : '';
-    return apiClient.get<ThesisTask[]>(`/api/thesis-tasks${queryParams}`);
+  async getThesisTasks(thesisId: number): Promise<ThesisTask[]> {
+    return apiClient.get<ThesisTask[]>(`/api/v1/thesis/student/reports/tasks/${thesisId}`);
   },
 
   /**
    * Create a weekly report (Student only)
    * POST /api/weekly-reports
    */
-  async createWeeklyReport(data: CreateWeeklyReportRequest): Promise<WeeklyReport> {
-    return apiClient.post<WeeklyReport>('/api/weekly-reports', data);
+  async createWeeklyReport(thesisId: number, data: CreateWeeklyReportRequest): Promise<WeeklyReport> {
+    return apiClient.post<WeeklyReport>(`/api/v1/thesis/student/reports/weekly/${thesisId}`, data);
   },
 
   /**
@@ -54,7 +53,7 @@ export const reportService = {
    * PUT /api/weekly-reports/:id
    */
   async updateWeeklyReport(id: number, data: UpdateWeeklyReportRequest): Promise<WeeklyReport> {
-    return apiClient.put<WeeklyReport>(`/api/weekly-reports/${id}`, data);
+    return apiClient.put<WeeklyReport>(`/api/v1/thesis/student/reports/weekly/${id}`, data); // Assuming id is reportId
   },
 
   /**
@@ -62,8 +61,11 @@ export const reportService = {
    * GET /api/weekly-reports
    */
   async getWeeklyReports(thesisId?: number): Promise<WeeklyReport[]> {
-    const queryParams = thesisId ? `?thesis_id=${thesisId}` : '';
-    return apiClient.get<WeeklyReport[]>(`/api/weekly-reports${queryParams}`);
+    if (thesisId) {
+      return apiClient.get<WeeklyReport[]>(`/api/v1/thesis/student/reports/weekly/${thesisId}`);
+    } else {
+      return apiClient.get<WeeklyReport[]>(`/api/v1/thesis/instructor/reports/weekly`);
+    }
   },
 
   /**
@@ -96,7 +98,7 @@ export const reportService = {
    */
   async submitWeeklyReport(thesisId: number, data: SubmitWeeklyReportRequest): Promise<StandardResponse<WeeklyReport>> {
     return apiClient.post<StandardResponse<WeeklyReport>>(
-      `/api/theses/${thesisId}/weekly-reports`,
+      `/api/v1/thesis/student/reports/weekly/${thesisId}`,
       data
     );
   },
@@ -107,7 +109,7 @@ export const reportService = {
    */
   async getThesisWeeklyReports(thesisId: number): Promise<StandardResponse<WeeklyReport[]>> {
     return apiClient.get<StandardResponse<WeeklyReport[]>>(
-      `/api/theses/${thesisId}/weekly-reports`
+      `/api/v1/thesis/student/reports/weekly/${thesisId}`
     );
   },
 
@@ -119,8 +121,8 @@ export const reportService = {
     reportId: number,
     data: WeeklyReportFeedbackRequest
   ): Promise<StandardResponse<WeeklyReport>> {
-    return apiClient.patch<StandardResponse<WeeklyReport>>(
-      `/api/weekly-reports/${reportId}/feedback`,
+    return apiClient.put<StandardResponse<WeeklyReport>>(
+      `/api/v1/thesis/instructor/reports/weekly/${reportId}/feedback`,
       data
     );
   },

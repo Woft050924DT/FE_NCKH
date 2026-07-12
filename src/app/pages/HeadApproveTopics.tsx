@@ -25,12 +25,12 @@ export function HeadApproveTopics() {
     const fetchRegistrations = async () => {
       try {
         setLoading(true);
-        const data = await topicRegistrationService.getTopicRegistrations();
-        // Filter registrations that need head approval (instructor approved, head pending)
-        const pendingHeadApprovals = data.filter((r: any) => 
-          r.instructor_status === 'APPROVED' && r.head_status === 'PENDING'
-        );
-        setRegistrations(pendingHeadApprovals);
+        // Lấy danh sách từ endpoint trưởng bộ môn
+        const data = await topicRegistrationService.getRegistrationsForHead({
+          instructor_status: 'APPROVED',
+          head_status: 'PENDING',
+        });
+        setRegistrations(data);
       } catch (error) {
         console.error('Error fetching registrations:', error);
         setRegistrations([]);
@@ -42,22 +42,21 @@ export function HeadApproveTopics() {
     fetchRegistrations();
   }, []);
 
+  const refreshList = async () => {
+    const data = await topicRegistrationService.getRegistrationsForHead({
+      instructor_status: 'APPROVED',
+      head_status: 'PENDING',
+    });
+    setRegistrations(data);
+  };
+
   const handleApprove = async (id: number, approved: boolean) => {
     if (approved) {
-      // Direct approve
       try {
         setIsSubmitting(true);
-        await topicRegistrationService.headApproveRegistration(id, {
-          status: 'APPROVED',
-          rejection_reason: '',
-        });
-        // Refresh list
-        const data = await topicRegistrationService.getTopicRegistrations();
-        const pendingHeadApprovals = data.filter((r: any) =>
-          r.instructor_status === 'APPROVED' && r.head_status === 'PENDING'
-        );
-        setRegistrations(pendingHeadApprovals);
-        alert('Đã duyệt đề tài thành công');
+        await topicRegistrationService.headApprove(id);
+        await refreshList();
+        alert('Đã duyệt đề tài thành công! Nhóm chat đã được tạo tự động.');
       } catch (error) {
         console.error('Error approving registration:', error);
         alert('Có lỗi xảy ra khi duyệt đề tài');
@@ -65,7 +64,6 @@ export function HeadApproveTopics() {
         setIsSubmitting(false);
       }
     } else {
-      // Open reject modal
       setSelectedRegistration(registrations.find((r: any) => r.id === id));
       setRejectionReason('');
       setIsRejectModalOpen(true);
@@ -80,16 +78,8 @@ export function HeadApproveTopics() {
 
     try {
       setIsSubmitting(true);
-      await topicRegistrationService.headApproveRegistration(selectedRegistration.id, {
-        status: 'REJECTED',
-        rejection_reason: rejectionReason,
-      });
-      // Refresh list
-      const data = await topicRegistrationService.getTopicRegistrations();
-      const pendingHeadApprovals = data.filter((r: any) =>
-        r.instructor_status === 'APPROVED' && r.head_status === 'PENDING'
-      );
-      setRegistrations(pendingHeadApprovals);
+      await topicRegistrationService.headReject(selectedRegistration.id, rejectionReason);
+      await refreshList();
       setIsRejectModalOpen(false);
       setRejectionReason('');
       setSelectedRegistration(null);

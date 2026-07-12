@@ -24,3 +24,4 @@ export { lmsService } from './lmsService';
 export { cmsService } from './cmsService';
 export { notificationService } from './notificationService';
 export { thesisService } from './thesisService';
+export * as socketService from './socketService';

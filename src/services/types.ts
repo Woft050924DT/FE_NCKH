@@ -609,6 +609,11 @@ export interface TopicRegistration {
   thesis_groups?: ThesisGroup;
 
   thesis_rounds?: ThesisRound;
+  
+  theses?: {
+    id: number;
+    status: string;
+  };
 
   instructors?: {
 

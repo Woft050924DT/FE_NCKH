@@ -80,7 +80,7 @@ export function WeeklyReports() {
         resultsAchieved: reportForm.resultsAchieved,
         difficultiesEncountered: reportForm.difficultiesEncountered,
         nextWeekPlan: reportForm.nextWeekPlan,
-        studentId: user?.studentId || 1,
+        studentId: user?.id || 1,
         contributions: [],
       });
 

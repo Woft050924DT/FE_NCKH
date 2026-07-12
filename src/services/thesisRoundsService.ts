@@ -32,7 +32,7 @@ export const thesisRoundsService = {
    * GET /api/admin/thesis-rounds
    */
   async getThesisRounds(): Promise<ThesisRound[]> {
-    return apiClient.get<ThesisRound[]>('/api/admin/thesis-rounds', false);
+    return apiClient.get<ThesisRound[]>('/api/admin/thesis-rounds');
   },
 
   /**
@@ -61,13 +61,13 @@ export const thesisRoundsService = {
 
   /**
    * Update thesis round status
-   * PATCH /api/admin/thesis-rounds/:roundId/status
+   * PUT /api/admin/thesis-rounds/:roundId/status
    */
   async updateThesisRoundStatus(
     roundId: number,
     data: UpdateThesisRoundStatusRequest
   ): Promise<StandardResponse<ThesisRound>> {
-    return apiClient.patch<StandardResponse<ThesisRound>>(
+    return apiClient.put<StandardResponse<ThesisRound>>(
       `/api/admin/thesis-rounds/${roundId}/status`,
       data
     );
@@ -90,18 +90,17 @@ export const thesisRoundsService = {
     data: { instructorIds: number[]; supervisionQuota: number }
   ): Promise<any> {
     return apiClient.post<any>(
-      `/api/admin/thesis-rounds/${id}/assign-instructors`,
+      `/api/admin/thesis-rounds/${id}/instructors`,
       data
     );
   },
 
   /**
    * Get instructor assignments for a thesis round
-   * GET /api/admin/thesis-rounds/:id/instructors
    */
   async getInstructorAssignments(id: number): Promise<StandardResponse<InstructorAssignment[]>> {
     return apiClient.get<StandardResponse<InstructorAssignment[]>>(
-      `/api/admin/thesis-rounds/${id}/instructors`
+      `/api/v1/thesis/thesis-rounds/${id}/instructors`
     );
   },
 
@@ -146,38 +145,7 @@ export const thesisRoundsService = {
     const result = await this.assignInstructors(roundId, data);
     return { data: result };
   },
-<<<<<<< HEAD
 
-  /**
-   * Get thesis round by ID (Admin only)
-   * GET /api/admin/thesis-rounds/:id
-   */
-  async getThesisRoundById(id: number): Promise<ThesisRound> {
-    return apiClient.get<ThesisRound>(`/api/admin/thesis-rounds/${id}`);
-  },
-
-  /**
-   * Update thesis round (Admin only)
-   * PUT /api/admin/thesis-rounds/:id
-   */
-  async updateThesisRound(id: number, data: UpdateThesisRoundRequest): Promise<ThesisRound> {
-    return apiClient.put<ThesisRound>(`/api/admin/thesis-rounds/${id}`, data);
-  },
-
-  /**
-   * Delete thesis round (Admin only)
-   * DELETE /api/admin/thesis-rounds/:id
-   */
-  async deleteThesisRound(id: number): Promise<{ message: string }> {
-    return apiClient.delete<{ message: string }>(`/api/admin/thesis-rounds/${id}`);
-  },
-
-  /**
-   * Get all thesis rounds (Head of Department)
-   * GET /api/department-head/thesis-rounds
-   */
-=======
->>>>>>> d85a178b9f0c8ea7a8a13a86ef362002d7ec7f6f
   async getThesisRoundsForHead(): Promise<ThesisRound[]> {
     return this.getThesisRounds();
   },
@@ -214,18 +182,16 @@ export const thesisRoundsService = {
 
   /**
    * Get active thesis rounds for instructor
-   * GET /api/admin/thesis-rounds/active
    */
   async getThesisRoundsForInstructor(): Promise<ThesisRound[]> {
-    return apiClient.get<ThesisRound[]>('/api/admin/thesis-rounds/active');
+    return apiClient.get<ThesisRound[]>('/api/v1/thesis/thesis-rounds/active');
   },
 
   /**
    * Get active thesis rounds (for instructor grading)
-   * GET /api/admin/thesis-rounds/active
    */
   async getActiveThesisRounds(): Promise<ThesisRound[]> {
-    return apiClient.get<ThesisRound[]>('/api/admin/thesis-rounds/active');
+    return apiClient.get<ThesisRound[]>('/api/v1/thesis/thesis-rounds/active');
   },
 
   // ==========================================
@@ -234,11 +200,10 @@ export const thesisRoundsService = {
 
   /**
    * Get active thesis rounds for student
-   * GET /api/students/thesis-rounds
    */
   async getThesisRoundsForStudent(): Promise<StandardResponse<ThesisRound[]>> {
     try {
-      const rounds = await apiClient.get<ThesisRound[]>('/api/admin/thesis-rounds/active');
+      const rounds = await apiClient.get<ThesisRound[]>('/api/v1/thesis/thesis-rounds/active');
       return { success: true, data: rounds, message: 'Success' } as any;
     } catch (error: any) {
       console.error('Error fetching student thesis rounds:', error);

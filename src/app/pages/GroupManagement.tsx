@@ -152,16 +152,18 @@ export function GroupManagement() {
       setLoading(true);
       setError(null);
 
-      if (!user?.studentId) {
+      if (!user?.id) {
         setError('Không tìm thấy thông tin sinh viên');
         return;
       }
 
       // Fetch my group
       try {
-        const groups = await thesisGroupsService.getThesisGroups(user.studentId);
+        const groups = await thesisGroupsService.getThesisGroups(user.id);
         if (groups && groups.length > 0) {
           setMyGroup(groups[0]);
+        } else {
+          setMyGroup(null);
         }
       } catch (e) {
         console.error('Error fetching my group:', e);
@@ -169,7 +171,7 @@ export function GroupManagement() {
 
       // Fetch invitations
       try {
-        const invs = await thesisGroupsService.getInvitations(user.studentId);
+        const invs = await thesisGroupsService.getInvitations(user.id);
         setInvitations(invs.filter((inv) => inv.status === 'PENDING'));
       } catch (e) {
         console.error('Error fetching invitations:', e);
@@ -196,7 +198,7 @@ export function GroupManagement() {
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.studentId) return;
+    if (!user?.id) return;
 
     try {
       setIsSubmitting(true);
@@ -208,7 +210,7 @@ export function GroupManagement() {
         group_type: createGroupForm.group_type as any,
         min_members: createGroupForm.min_members,
         max_members: createGroupForm.max_members,
-        student_id: user.studentId,
+        student_id: user.id,
       });
 
       setIsCreateGroupModalOpen(false);
@@ -222,7 +224,7 @@ export function GroupManagement() {
       fetchData();
     } catch (e: any) {
       console.error('Error creating group:', e);
-      setError(e.response?.data?.error || 'Không thể tạo nhóm. Vui lòng thử lại.');
+      setError(e.message || 'Không thể tạo nhóm. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -230,7 +232,7 @@ export function GroupManagement() {
 
   const handleSendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.studentId || !myGroup || inviteForm.invited_student_ids.length === 0) return;
+    if (!user?.id || !myGroup || inviteForm.invited_student_ids.length === 0) return;
 
     try {
       setIsSubmitting(true);
@@ -242,7 +244,7 @@ export function GroupManagement() {
           thesis_group_id: myGroup.id,
           invited_student_id: parseInt(studentId),
           invitation_message: inviteForm.invitation_message,
-          student_id: user.studentId,
+          student_id: user.id,
         });
       }
 
@@ -257,58 +259,79 @@ export function GroupManagement() {
       fetchData();
     } catch (e: any) {
       console.error('Error sending invitation:', e);
-      setError(e.response?.data?.error || 'Không thể gửi lời mời. Vui lòng thử lại.');
+      setError(e.message || 'Không thể gửi lời mời. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleAcceptInvitation = async (invitationId: number) => {
-    if (!user?.studentId) return;
+    if (!user?.id) return;
 
     try {
       setIsSubmitting(true);
       setError(null);
 
-      await thesisGroupsService.acceptInvitation(invitationId, user.studentId);
+      await thesisGroupsService.acceptInvitation(invitationId, user.id);
       fetchData();
     } catch (e: any) {
       console.error('Error accepting invitation:', e);
-      setError(e.response?.data?.error || 'Không thể chấp nhận lời mời. Vui lòng thử lại.');
+      setError(e.message || 'Không thể chấp nhận lời mời. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRejectInvitation = async (invitationId: number) => {
-    if (!user?.studentId) return;
+    if (!user?.id) return;
 
     try {
       setIsSubmitting(true);
       setError(null);
 
-      await thesisGroupsService.rejectInvitation(invitationId, user.studentId);
+      await thesisGroupsService.rejectInvitation(invitationId, user.id);
       fetchData();
     } catch (e: any) {
       console.error('Error rejecting invitation:', e);
-      setError(e.response?.data?.error || 'Không thể từ chối lời mời. Vui lòng thử lại.');
+      setError(e.message || 'Không thể từ chối lời mời. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleLeaveGroup = async () => {
-    if (!user?.studentId || !myGroup) return;
+    if (!user?.id || !myGroup) return;
 
     try {
       setIsSubmitting(true);
       setError(null);
 
-      await thesisGroupsService.leaveGroup(user.studentId, myGroup.id);
+      await thesisGroupsService.leaveGroup(user.id, myGroup.id);
       fetchData();
     } catch (e: any) {
       console.error('Error leaving group:', e);
-      setError(e.response?.data?.error || 'Không thể rời nhóm. Vui lòng thử lại.');
+      setError(e.message || 'Không thể rời nhóm. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDissolveGroup = async () => {
+    if (!user?.id || !myGroup) return;
+
+    if (!window.confirm('Bạn có chắc chắn muốn giải tán nhóm này? Hành động này không thể hoàn tác.')) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      await thesisGroupsService.dissolveThesisGroup(myGroup.id, user.id);
+      fetchData();
+    } catch (e: any) {
+      console.error('Error dissolving group:', e);
+      setError(e.message || 'Không thể giải tán nhóm. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -420,14 +443,25 @@ export function GroupManagement() {
                         Mời thành viên
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      className="flex-1"
-                      onClick={handleLeaveGroup}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Rời nhóm'}
-                    </Button>
+                    {myGroup?.thesis_group_members?.find((m: any) => m.students?.users?.id === user?.id)?.role === 'LEADER' ? (
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={handleDissolveGroup}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Giải tán nhóm'}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={handleLeaveGroup}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Rời nhóm'}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -49,7 +49,8 @@ export const studentService = {
     const queryString = queryParams.toString();
     const endpoint = `/api/students/classes${queryString ? `?${queryString}` : ''}`;
     
-    return apiClient.get<StudentClass[]>(endpoint);
+    const response = await apiClient.get<any>(endpoint);
+    return response.data || response;
   },
 
   /**
@@ -57,6 +58,7 @@ export const studentService = {
    * GET /api/students/classes/:id
    */
   async getClassById(id: number): Promise<StudentClassDetail> {
-    return apiClient.get<StudentClassDetail>(`/api/students/classes/${id}`);
+    const response = await apiClient.get<any>(`/api/students/classes/${id}`);
+    return response.data || response;
   },
 };

@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { reportService, thesisRoundsService } from '@/services';
+import { reportService, thesisRoundsService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function WeeklyReports() {
@@ -36,7 +36,7 @@ export function WeeklyReports() {
         const [roundsRes, regsRes] = await Promise.all([
           thesisRoundsService.getThesisRoundsForStudent(),
           // Import topicRegistrationService at the top
-          import('@/services').then(s => s.topicRegistrationService.getTopicRegistrations())
+          import('@/plugins/api').then(s => s.topicRegistrationService.getTopicRegistrations())
         ]);
         
         const rounds = roundsRes.success ? roundsRes.data : [];

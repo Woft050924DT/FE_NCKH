@@ -4,7 +4,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { thesisRoundsService } from '@/services';
+import { thesisRoundsService } from '@/plugins/api';
 
 export function AdminDashboard() {
   const [loading, setLoading] = useState(true);

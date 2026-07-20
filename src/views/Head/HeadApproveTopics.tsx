@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Avatar } from '@/components/ui/Avatar';
-import { topicRegistrationService } from '@/services';
+import { topicRegistrationService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function HeadApproveTopics() {

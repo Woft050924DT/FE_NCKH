@@ -10,8 +10,8 @@ import { Avatar } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { ModalCreateBoard } from '@/components/ModalCreateBoard';
 import { ModalCouncilDetail } from '@/components/ModalCouncilDetail';
-import { councilService } from '@/services/councilService';
-import type { Council } from '@/services/types';
+import { councilService } from '@/plugins/api';
+import type { Council } from '@/types/api';
 
 export function DefenseCouncils() {
   const { user } = useAuth();
@@ -26,7 +26,8 @@ export function DefenseCouncils() {
     try {
       setLoading(true);
       const data = await councilService.getCouncils();
-      setCouncils(data);
+      const councilsArray = Array.isArray(data) ? data : (data as any)?.data || [];
+      setCouncils(councilsArray);
     } catch (error) {
       console.error('Error fetching councils:', error);
       setCouncils([]);

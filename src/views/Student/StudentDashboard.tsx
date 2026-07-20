@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { thesisGroupsService, topicRegistrationService, reportService, gradingService } from '@/services';
+import { thesisGroupsService, topicRegistrationService, reportService, gradingService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function StudentDashboard() {

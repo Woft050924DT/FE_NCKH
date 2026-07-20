@@ -5,11 +5,11 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
 import { useAuth } from '@/contexts/AuthContext';
-import { chatboxService, type Conversation, type ChatMessage } from '@/services/chatboxService';
+import { chatboxService, type Conversation, type ChatMessage } from '@/plugins/api';
 import {
   connectSocket, disconnectSocket, joinConversation, leaveConversation,
   sendSocketMessage, startTyping, stopTyping, getSocket,
-} from '@/services/socketService';
+} from '@/plugins/api';
 
 // Helper format thời gian tin nhắn
 function formatTime(dateStr: string): string {

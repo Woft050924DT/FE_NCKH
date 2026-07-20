@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { BookOpen, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { authService } from '@/services';
+import { authService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function Login() {

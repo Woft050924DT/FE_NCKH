@@ -4,10 +4,10 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { councilService } from '@/services/councilService';
-import { instructorService } from '@/services/instructorService';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import type { CreateCouncilRequest, ThesisRound } from '@/services/types';
+import { councilService } from '@/plugins/api';
+import { instructorService } from '@/plugins/api';
+import { thesisRoundsService } from '@/plugins/api';
+import type { CreateCouncilRequest, ThesisRound } from '@/types/api';
 
 interface ModalCreateBoardProps {
   isOpen: boolean;
@@ -48,7 +48,12 @@ export function ModalCreateBoard({ isOpen, onClose, onSuccess, thesisRoundId }: 
             instructorService.getInstructors(),
             thesisRoundsService.getActiveThesisRoundsForHead()
           ]);
-          setInstructors(instructorsData);
+          // Handle different response formats from instructorService
+          const instructorsArray = Array.isArray(instructorsData) 
+            ? instructorsData 
+            : (instructorsData as any)?.data || [];
+          setInstructors(instructorsArray);
+          
           // Handle different response formats from thesisRoundsService
           const roundsArray = Array.isArray(thesisRoundsData) 
             ? thesisRoundsData 

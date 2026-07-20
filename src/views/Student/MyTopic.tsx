@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
-import { topicRegistrationService, thesisRoundsService, instructorService } from '@/services';
+import { topicRegistrationService, thesisRoundsService, instructorService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
-import type { ProposedTopic, CreateProposedTopicRequest, ThesisRound } from '@/services/types';
+import type { ProposedTopic, CreateProposedTopicRequest, ThesisRound } from '@/types/api';
 
 export function MyTopics() {
   const { user } = useAuth();

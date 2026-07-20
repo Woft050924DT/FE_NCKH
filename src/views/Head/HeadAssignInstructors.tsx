@@ -28,13 +28,13 @@ import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/contexts/AuthContext';
 
 
-import { thesisRoundsService } from '@/services/thesisRoundsService';
+import { thesisRoundsService } from '@/plugins/api';
 
 
-import { instructorService } from '@/services/instructorService';
+import { instructorService } from '@/plugins/api';
 
 
-import type { ThesisRound, InstructorAssignment } from '@/services/types';
+import type { ThesisRound, InstructorAssignment } from '@/types/api';
 
 
 

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { PageLayout } from './PageLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import type { UserRole } from '@/services/types';
+import type { UserRole } from '@/types/api';
 
 interface RoleBasedPageLayoutProps {
   children: ReactNode;

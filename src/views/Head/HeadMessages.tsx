@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/Input';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { chatboxService, type Conversation, type ChatMessage } from '@/services/chatboxService';
+import { chatboxService, type Conversation, type ChatMessage } from '@/plugins/api';
 import {
   connectSocket, disconnectSocket, joinConversation, leaveConversation,
   sendSocketMessage, startTyping, stopTyping,
-} from '@/services/socketService';
+} from '@/plugins/api';
 
 function formatTime(dateStr: string): string {
   const d = new Date(dateStr);

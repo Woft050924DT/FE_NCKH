@@ -4,8 +4,8 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { adminService } from '@/services/adminService';
-import type { UserManagement } from '@/services/types';
+import { adminService } from '@/plugins/api';
+import type { UserManagement } from '@/types/api';
 
 export function AdminUserManagement() {
   const [loading, setLoading] = useState(true);

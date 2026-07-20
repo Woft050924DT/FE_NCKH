@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/contexts/AuthContext';
-import { topicRegistrationService } from '@/services/topicRegistrationService';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import { instructorService } from '@/services/instructorService';
-import { gradingService } from '@/services/gradingService';
-import type { ThesisRound, TopicRegistration, CreateReviewAssignmentRequest } from '@/services/types';
+import { topicRegistrationService } from '@/plugins/api';
+import { thesisRoundsService } from '@/plugins/api';
+import { instructorService } from '@/plugins/api';
+import { gradingService } from '@/plugins/api';
+import type { ThesisRound, TopicRegistration, CreateReviewAssignmentRequest } from '@/types/api';
 
 type TabType = 'individual' | 'group';
 
@@ -142,7 +142,10 @@ export function HeadAssignReviewers() {
         setError(null);
         try {
           const data = await instructorService.getInstructors();
-          setInstructors(data);
+          const instructorsArray = Array.isArray(data) 
+            ? data 
+            : (data as any)?.data || [];
+          setInstructors(instructorsArray);
         } catch (err: any) {
           setError(err.message || 'Không thể tải danh sách giáo viên');
         } finally {

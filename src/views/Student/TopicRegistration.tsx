@@ -7,7 +7,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
-import { topicRegistrationService, thesisGroupsService, thesisRoundsService, instructorService } from '@/services';
+import { topicRegistrationService, thesisGroupsService, thesisRoundsService, instructorService } from '@/plugins/api';
 
 export function TopicRegistration() {
   const [currentStep, setCurrentStep] = useState(1);

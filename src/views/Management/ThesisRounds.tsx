@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/contexts/AuthContext';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import type { ThesisRound } from '@/services/types';
+import { thesisRoundsService } from '@/plugins/api';
+import type { ThesisRound } from '@/types/api';
 import { translateStatus } from '@/helpers/constant';
 
 export function ThesisRounds() {

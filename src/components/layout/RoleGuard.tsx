@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import type { UserRole } from '@/services/types';
+import type { UserRole } from '@/types/api';
 
 interface RoleGuardProps {
   children: ReactNode;

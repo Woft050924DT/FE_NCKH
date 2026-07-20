@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/services';
+import { apiClient } from '@/plugins/api';
 import {
   authService,
   aiChatService,
@@ -10,7 +10,7 @@ import {
   thesisService,
   thesisGroupsService,
   thesisRoundsService,
-} from '@/services';
+} from '@/plugins/api';
 
 interface TestResult {
   name: string;

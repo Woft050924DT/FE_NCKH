@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Avatar } from '@/components/ui/Avatar';
 import { InstructorGradingForm } from '@/components/InstructorGradingForm';
 import { useAuth } from '@/contexts/AuthContext';
-import { gradingService } from '@/services/gradingService';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import type { SupervisionStudent, ReviewStudent, ThesisRound } from '@/services/types';
+import { gradingService } from '@/plugins/api';
+import { thesisRoundsService } from '@/plugins/api';
+import type { SupervisionStudent, ReviewStudent, ThesisRound } from '@/types/api';
 
 export function InstructorGrading() {
   const { user } = useAuth();

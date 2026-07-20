@@ -2,7 +2,7 @@ import { Modal } from './ui/Modal';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { User, Shield, Calendar, MapPin, Clock, Users, Crown, FileText } from 'lucide-react';
-import type { Council } from '@/services/types';
+import type { Council } from '@/types/api';
 import { translateStatus, getStatusBadgeVariant } from '@/helpers/constant';
 
 interface ModalCouncilDetailProps {

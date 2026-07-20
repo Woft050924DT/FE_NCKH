@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { thesisRoundsService, instructorService } from '@/services';
-import type { ThesisRound } from '@/services/types';
+import { thesisRoundsService, instructorService } from '@/plugins/api';
+import type { ThesisRound } from '@/types/api';
 
 export function MyStudents() {
   const { user } = useAuth();

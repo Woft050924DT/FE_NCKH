@@ -3,7 +3,7 @@ import { TrendingUp, Award, BookOpen, GraduationCap } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { gradingService } from '@/services';
+import { gradingService } from '@/plugins/api';
 
 export function Scores() {
   const [loading, setLoading] = useState(true);

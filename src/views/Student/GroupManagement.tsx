@@ -11,10 +11,10 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { useAuth } from '@/contexts/AuthContext';
-import { thesisGroupsService } from '@/services/thesisGroupsService';
-import { studentService } from '@/services/studentService';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import type { ThesisGroup, GroupInvitation, StudentClass, StudentClassStudent, ThesisRound } from '@/services/types';
+import { thesisGroupsService } from '@/plugins/api';
+import { studentService } from '@/plugins/api';
+import { thesisRoundsService } from '@/plugins/api';
+import type { ThesisGroup, GroupInvitation, StudentClass, StudentClassStudent, ThesisRound } from '@/types/api';
 
 export function GroupManagement() {
   const { user } = useAuth();

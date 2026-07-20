@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
-import { topicRegistrationService, reportService, instructorService } from '@/services';
+import { topicRegistrationService, reportService, instructorService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
-import type { TopicRegistration } from '@/services/types';
+import type { TopicRegistration } from '@/types/api';
 
 export function InstructorDashboard() {
   const { user } = useAuth();

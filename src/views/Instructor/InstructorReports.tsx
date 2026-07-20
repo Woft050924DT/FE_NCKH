@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { reportService } from '@/services';
+import { reportService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function InstructorReports() {

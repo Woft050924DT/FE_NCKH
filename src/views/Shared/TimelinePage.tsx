@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { thesisGroupsService, topicRegistrationService, reportService, thesisRoundsService } from '@/services';
+import { thesisGroupsService, topicRegistrationService, reportService, thesisRoundsService } from '@/plugins/api';
 
 export function TimelinePage() {
   const { user } = useAuth();

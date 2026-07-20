@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { useAuth } from '@/contexts/AuthContext';
-import { thesisRoundsService } from '@/services/thesisRoundsService';
-import type { ThesisRound } from '@/services/types';
+import { thesisRoundsService, councilService } from '@/plugins/api';
+import type { ThesisRound } from '@/types/api';
 
 interface ReviewScheduleItem {
   id: number;
@@ -78,6 +78,7 @@ export function HeadReviewSchedule() {
 
   useEffect(() => {
     fetchRounds();
+    fetchCouncils();
     // Load schedules from localStorage
     const savedSchedules = localStorage.getItem('reviewSchedules');
     if (savedSchedules) {
@@ -113,6 +114,47 @@ export function HeadReviewSchedule() {
       console.error('Error fetching rounds:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchCouncils = async () => {
+    try {
+      const data = await councilService.getCouncils();
+      const councilsArray = Array.isArray(data) ? data : (data as any)?.data || [];
+      const mappedCommittees: Committee[] = councilsArray.map((c: any) => {
+        const members = [];
+        if (c.instructors_defense_councils_chairman_idToinstructors) {
+          members.push({
+            id: c.chairman_id,
+            name: c.instructors_defense_councils_chairman_idToinstructors.users?.full_name || 'Chủ tịch',
+            role: 'chairman'
+          });
+        }
+        if (c.instructors_defense_councils_secretary_idToinstructors) {
+          members.push({
+            id: c.secretary_id,
+            name: c.instructors_defense_councils_secretary_idToinstructors.users?.full_name || 'Thư ký',
+            role: 'secretary'
+          });
+        }
+        if (c.council_members) {
+          c.council_members.forEach((m: any) => {
+            members.push({
+              id: m.id,
+              name: m.instructors?.users?.full_name || m.instructors?.instructor_code || '',
+              role: m.role ? m.role.toLowerCase() : 'reviewer'
+            });
+          });
+        }
+        return {
+          id: c.id,
+          name: c.council_name,
+          members: members
+        };
+      });
+      setCommittees(mappedCommittees);
+    } catch (error) {
+      console.error('Error fetching councils:', error);
     }
   };
 

@@ -4,9 +4,9 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { topicRegistrationService, defenseService, thesisRoundsService } from '@/services';
+import { topicRegistrationService, defenseService, thesisRoundsService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
-import type { TopicRegistration } from '@/services/types';
+import type { TopicRegistration } from '@/types/api';
 
 export function HeadDashboard() {
   const { user } = useAuth();

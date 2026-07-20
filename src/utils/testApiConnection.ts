@@ -3,8 +3,8 @@
  * Run this in browser console or import in a component to test connection
  */
 
-import { apiClient } from '../services/apiClient';
-import { authService } from '../services/authService';
+import { apiClient } from '@/services/apiClient';
+import { authService } from '@/services/authService';
 
 export async function testApiGatewayConnection() {
   console.log('🔍 Testing API Gateway Connection...');

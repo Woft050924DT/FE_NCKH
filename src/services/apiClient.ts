@@ -1,6 +1,5 @@
-const BASE_URL = 'http://localhost:3000';
+import axiosInstance from '@/plugins/axios';
 
-// Custom API Error class for better error handling
 class ApiError extends Error {
   status: number;
   response?: any;
@@ -16,112 +15,34 @@ class ApiError extends Error {
 }
 
 class ApiClient {
-  private getHeaders(includeAuth: boolean = true): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (includeAuth) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+  private async handleRequest<T>(request: Promise<any>): Promise<T> {
+    try {
+      const response = await request;
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        const errorData = error.response.data;
+        const errorMessage = errorData?.error || errorData?.message || `HTTP error! status: ${error.response.status}`;
+        throw new ApiError(errorMessage, error.response.status, errorData, error.response.statusText);
       }
+      throw error;
     }
-
-    return headers;
-  }
-
-  private async handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-      // Read the body only once
-      const bodyText = await response.text();
-      
-      let errorData: any;
-      try {
-        errorData = JSON.parse(bodyText);
-      } catch (e) {
-        // If not JSON, use the text directly
-        errorData = { error: bodyText || `HTTP error! status: ${response.status}` };
-      }
-      
-      const errorMessage = errorData.error || errorData.message || bodyText || `HTTP error! status: ${response.status}`;
-      
-      // Handle specific error types
-      if (response.status === 401) {
-        // Unauthorized - clear auth data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-      
-      throw new ApiError(errorMessage, response.status, errorData, response.statusText);
-    }
-
-    return response.json();
   }
 
   async get<T>(endpoint: string, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'GET',
-      headers: this.getHeaders(includeAuth),
-    });
-
-    return this.handleResponse<T>(response);
+    return this.handleRequest<T>(axiosInstance.get(endpoint));
   }
 
-  async post<T>(endpoint: string, data?: any, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: this.getHeaders(includeAuth),
-      body: data ? JSON.stringify(data) : undefined,
-    });
-
-    return this.handleResponse<T>(response);
+  async post<T>(endpoint: string, data?: any, includeAuth: boolean = true, customHeaders?: HeadersInit): Promise<T> {
+    return this.handleRequest<T>(axiosInstance.post(endpoint, data));
   }
 
   async put<T>(endpoint: string, data?: any, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'PUT',
-      headers: this.getHeaders(includeAuth),
-      body: data ? JSON.stringify(data) : undefined,
-    });
-
-    return this.handleResponse<T>(response);
+    return this.handleRequest<T>(axiosInstance.put(endpoint, data));
   }
 
   async delete<T>(endpoint: string, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'DELETE',
-      headers: this.getHeaders(includeAuth),
-    });
-
-    return this.handleResponse<T>(response);
-  }
-
-  async patch<T>(endpoint: string, data?: any, includeAuth: boolean = true): Promise<T> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'PATCH',
-      headers: this.getHeaders(includeAuth),
-      body: data ? JSON.stringify(data) : undefined,
-    });
-
-    return this.handleResponse<T>(response);
-  }
-
-  /**
-   * Health check for API Gateway
-   * GET /health
-   */
-  async healthCheck(): Promise<{ status: string; timestamp: string }> {
-    const response = await fetch(`${BASE_URL}/health`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Gateway health check failed: ${response.status}`);
-    }
-
-    return response.json();
+    return this.handleRequest<T>(axiosInstance.delete(endpoint));
   }
 }
 

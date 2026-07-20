@@ -21,7 +21,7 @@ export const reportService = {
    * POST /api/thesis-tasks
    */
   async createThesisTask(data: CreateThesisTaskRequest): Promise<ThesisTask> {
-    return apiClient.post<ThesisTask>('/api/v1/thesis/student/reports/tasks', data);
+    return apiClient.post<ThesisTask>('/api/v1/thesis/student/tasks', data);
   },
 
   /**
@@ -29,7 +29,7 @@ export const reportService = {
    * PUT /api/thesis-tasks/:id
    */
   async updateThesisTask(id: number, data: UpdateThesisTaskRequest): Promise<ThesisTask> {
-    return apiClient.put<ThesisTask>(`/api/v1/thesis/student/reports/tasks/${id}`, data);
+    return apiClient.put<ThesisTask>(`/api/v1/thesis/student/tasks/${id}`, data);
   },
 
   /**
@@ -37,7 +37,23 @@ export const reportService = {
    * GET /api/thesis-tasks
    */
   async getThesisTasks(thesisId: number): Promise<ThesisTask[]> {
-    return apiClient.get<ThesisTask[]>(`/api/v1/thesis/student/reports/tasks/${thesisId}`);
+    return apiClient.get<ThesisTask[]>(`/api/v1/thesis/student/tasks/${thesisId}`);
+  },
+
+  /**
+   * Get Kanban lists for a thesis
+   * GET /api/v1/thesis/student/tasks/lists/:thesisId
+   */
+  async getKanbanLists(thesisId: number): Promise<any[]> {
+    return apiClient.get<any[]>(`/api/v1/thesis/student/tasks/lists/${thesisId}`);
+  },
+
+  /**
+   * Create a Kanban list
+   * POST /api/v1/thesis/student/tasks/lists
+   */
+  async createKanbanList(data: { thesis_id: number; name: string }): Promise<any> {
+    return apiClient.post<any>('/api/v1/thesis/student/tasks/lists', data);
   },
 
   /**
@@ -104,12 +120,32 @@ export const reportService = {
   },
 
   /**
+   * Upload an attachment for a weekly report
+   * POST /api/v1/thesis/student/reports/upload
+   */
+  async uploadAttachment(file: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('attachmentFile', file);
+    return apiClient.post<{ url: string }>('/api/v1/thesis/student/reports/upload', formData);
+  },
+
+  /**
    * Get weekly reports for thesis (Student member or Instructor supervisor)
    * GET /api/theses/:thesisId/weekly-reports
    */
   async getThesisWeeklyReports(thesisId: number): Promise<StandardResponse<WeeklyReport[]>> {
     return apiClient.get<StandardResponse<WeeklyReport[]>>(
       `/api/v1/thesis/student/reports/weekly/${thesisId}`
+    );
+  },
+
+  /**
+   * Get weekly reports for thesis (Instructor supervisor)
+   * GET /api/v1/thesis/instructor/reports/weekly/:thesisId
+   */
+  async getThesisWeeklyReportsForInstructor(thesisId: number): Promise<StandardResponse<WeeklyReport[]>> {
+    return apiClient.get<StandardResponse<WeeklyReport[]>>(
+      `/api/v1/thesis/instructor/reports/weekly/${thesisId}`
     );
   },
 

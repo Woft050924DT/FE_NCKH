@@ -1017,6 +1017,8 @@ export interface CreateThesisTaskRequest {
 
   student_id: number;
 
+  list_id?: number;
+
 }
 
 

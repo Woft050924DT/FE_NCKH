@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router';
 import { FileText, Search, Filter, Eye, Clock, CheckCircle, XCircle, AlertCircle, User, Calendar } from 'lucide-react';
 import { translateStatus } from '@/helpers/constant';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { reportService, instructorService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Users, Building2, GraduationCap, Settings, Edit } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { thesisRoundsService } from '@/plugins/api';
 
 export function AdminDashboard() {

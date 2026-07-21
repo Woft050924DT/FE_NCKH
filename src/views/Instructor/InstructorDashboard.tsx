@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Users, FileCheck, Clock, TrendingUp, X, Eye } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
 import { topicRegistrationService, reportService, instructorService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 import type { TopicRegistration } from '@/types/api';

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Calendar, FileText, Download, Upload } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge, getStatusBadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function ReviewSchedule() {

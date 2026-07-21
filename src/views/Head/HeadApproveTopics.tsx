@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FileText, CheckCircle, XCircle, Clock, Search, Filter, X } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge, getStatusBadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Avatar } from '@/components/ui/Avatar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Avatar } from '@/components/ui/avatar';
 import { topicRegistrationService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 

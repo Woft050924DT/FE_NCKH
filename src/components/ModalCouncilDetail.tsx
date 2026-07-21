@@ -1,6 +1,6 @@
 import { Modal } from './ui/Modal';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
-import { Badge } from './ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
 import { User, Shield, Calendar, MapPin, Clock, Users, Crown, FileText } from 'lucide-react';
 import type { Council } from '@/types/api';
 import { translateStatus, getStatusBadgeVariant } from '@/helpers/constant';

@@ -7,19 +7,19 @@ import { UserPlus, Search, Check, X, Users, Eye } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 import { Modal } from '@/components/ui/Modal';

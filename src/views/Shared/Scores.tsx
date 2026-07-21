@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, Award, BookOpen, GraduationCap } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { gradingService } from '@/plugins/api';
 
 export function Scores() {

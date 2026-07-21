@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/Card';
-import { Badge } from './ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Badge } from './ui/badge';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 
 interface Deadline {

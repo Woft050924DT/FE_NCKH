@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Modal } from './ui/Modal';
-import { Input } from './ui/Input';
-import { Textarea } from './ui/Textarea';
-import { Button } from './ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { gradingService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 

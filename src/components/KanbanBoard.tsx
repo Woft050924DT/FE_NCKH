@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
-import { Badge } from './ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
 import { Calendar, CheckCircle2, Clock, Plus, X } from 'lucide-react';
-import { Avatar } from './ui/Avatar';
+import { Avatar } from './ui/avatar';
 
 interface Task {
   id: number;

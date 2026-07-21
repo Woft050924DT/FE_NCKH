@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Eye, Edit, Power, PlayCircle } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge, getStatusBadgeVariant } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/contexts/AuthContext';
 import { thesisRoundsService } from '@/plugins/api';

@@ -1,7 +1,7 @@
 import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus, GraduationCap, Clock, Library } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { cn } from '@/utils/cn';
-import { Avatar } from '../ui/Avatar';
+import { Avatar } from '../ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {

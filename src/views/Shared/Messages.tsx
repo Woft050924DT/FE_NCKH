@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Send, Paperclip, Smile, MoreVertical, Users } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import { useAuth } from '@/contexts/AuthContext';
 import { chatboxService, type Conversation, type ChatMessage } from '@/plugins/api';

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Search, Users, FileText, GraduationCap, CheckSquare } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Avatar } from '@/components/ui/Avatar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar } from '@/components/ui/avatar';
 import { InstructorGradingForm } from '@/components/InstructorGradingForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { gradingService } from '@/plugins/api';

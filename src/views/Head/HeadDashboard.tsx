@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { FileText, TrendingUp, CheckCircle, XCircle, X, Eye } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { topicRegistrationService, defenseService, thesisRoundsService } from '@/plugins/api';
 import { useAuth } from '@/contexts/AuthContext';
 import type { TopicRegistration } from '@/types/api';

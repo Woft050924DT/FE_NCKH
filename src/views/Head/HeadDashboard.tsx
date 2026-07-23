@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, TrendingUp, CheckCircle, XCircle, X, Eye } from 'lucide-react';
+import { FileText, TrendingUp, CheckCircle, XCircle, X, Eye, Bell } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -128,7 +128,14 @@ export function HeadDashboard() {
       title="Dashboard Trưởng Bộ Môn"
       subtitle="Tổng quan quản lý đợt khóa luận"
       actions={
-        <Button>Tạo đợt khóa luận mới</Button>
+        <Button variant="outline" size="icon" className="relative" title="Thông báo">
+          <Bell className="w-4 h-4" />
+          {pendingTopics.length > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              {pendingTopics.length}
+            </span>
+          )}
+        </Button>
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

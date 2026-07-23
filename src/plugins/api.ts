@@ -1330,6 +1330,40 @@ export const reportService = {
   },
 
   /**
+   * Giảng viên nộp điểm phản biện
+   * POST /api/gradings/review-results
+   */
+  async submitReviewResult(data: any): Promise<any> {
+    if (data.grading_file || data.gradingFile) {
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
+      });
+      return apiClient.post<any>('/api/v1/thesis/instructor/grading/review-results', formData, true, { 'Content-Type': 'multipart/form-data' });
+    }
+    return apiClient.post<any>('/api/v1/thesis/instructor/grading/review-results', data);
+  },
+
+  /**
+   * Giảng viên nộp điểm hướng dẫn
+   * POST /api/gradings/supervision-comments
+   */
+  async submitSupervisionComment(data: any): Promise<any> {
+    if (data.grading_file || data.gradingFile) {
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
+      });
+      return apiClient.post<any>('/api/v1/thesis/instructor/grading/supervision-comments', formData, true, { 'Content-Type': 'multipart/form-data' });
+    }
+    return apiClient.post<any>('/api/v1/thesis/instructor/grading/supervision-comments', data);
+  },
+
+  /**
    * Create a Kanban list
    * POST /api/v1/thesis/student/tasks/lists
    */

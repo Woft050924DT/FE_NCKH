@@ -132,8 +132,11 @@ export function MyTopics() {
         return;
       }
 
+      const autoTopicCode = `DT-${Date.now().toString().slice(-6)}`;
+
       const topicData: CreateProposedTopicRequest = {
         ...formData,
+        topic_code: autoTopicCode,
         instructor_id: instructorId,
         thesis_round_id: selectedRoundId || formData.thesis_round_id,
       };
@@ -389,15 +392,7 @@ export function MyTopics() {
       >
         <form onSubmit={handleCreateTopic} className="space-y-6">
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Mã đề tài</label>
-              <Input
-                placeholder="VD: DT-004"
-                required
-                value={formData.topic_code}
-                onChange={(e) => setFormData({ ...formData, topic_code: e.target.value })}
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">Tên đề tài</label>
               <Input

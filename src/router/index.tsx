@@ -17,6 +17,7 @@ import { HeadMessages } from '@/views/Head/HeadMessages';
 import { HeadAssignInstructors } from '@/views/Head/HeadAssignInstructors';
 import { HeadAssignReviewers } from '@/views/Head/HeadAssignReviewers';
 import { HeadReviewSchedule } from '@/views/Head/HeadReviewSchedule';
+import { HeadGradingTemplates } from '@/views/Head/HeadGradingTemplates';
 import { ThesisRounds } from '@/views/Management/ThesisRounds';
 import { Messages } from '@/views/Shared/Messages';
 import { TimelinePage } from '@/views/Shared/TimelinePage';
@@ -70,6 +71,7 @@ export function AppRoutes() {
       <Route path="/assign-instructors" element={<ProtectedRoute>{(userRole === 'head' || userRole === 'department_head') && <HeadAssignInstructors />}</ProtectedRoute>} />
       <Route path="/assign-reviewers" element={<ProtectedRoute>{(userRole === 'head' || userRole === 'department_head') && <HeadAssignReviewers />}</ProtectedRoute>} />
       <Route path="/review-schedule" element={<ProtectedRoute>{(userRole === 'head' || userRole === 'department_head') && <HeadReviewSchedule />}</ProtectedRoute>} />
+      <Route path="/grading-templates" element={<ProtectedRoute>{(userRole === 'head' || userRole === 'department_head' || userRole === 'admin') && <HeadGradingTemplates />}</ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute>{userRole === 'student' && <Messages />}{(userRole === 'head' || userRole === 'department_head') && <HeadMessages />}{userRole === 'instructor' && <Messages />}</ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute>{userRole === 'student' && <WeeklyReports />}{userRole === 'instructor' && <InstructorAllReports />}{(userRole === 'head' || userRole === 'department_head') && <HeadReports />}</ProtectedRoute>} />
       <Route path="/scores" element={<ProtectedRoute>{userRole === 'student' && <Scores />}</ProtectedRoute>} />

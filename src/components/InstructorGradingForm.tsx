@@ -69,6 +69,9 @@ export function InstructorGradingForm({
     topicEvaluation: '',
     improvementSuggestions: '',
     reviewScore: 0,
+    
+    // File upload
+    gradingFile: null as File | null,
   });
   
   const [loading, setLoading] = useState(false);
@@ -107,6 +110,7 @@ export function InstructorGradingForm({
           supervision_score: formData.supervisionScore,
           defense_approval: formData.defenseApproval,
           rejection_reason: formData.rejectionReason || null,
+          grading_file: formData.gradingFile,
           instructor_id: instructorId,
         });
       } else {
@@ -119,7 +123,7 @@ export function InstructorGradingForm({
           review_score: formData.reviewScore,
           defense_approval: formData.defenseApproval,
           rejection_reason: formData.rejectionReason || null,
-          review_file: null,
+          grading_file: formData.gradingFile,
           instructor_id: instructorId,
         });
       }
@@ -400,6 +404,23 @@ export function InstructorGradingForm({
                 />
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* IV. File đính kèm */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">IV. ĐÍNH KÈM PHIẾU ĐIỂM KÝ TÊN</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tải lên bản scan/PDF đã ký (tùy chọn):</label>
+              <Input
+                type="file"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={(e) => setFormData(prev => ({ ...prev, gradingFile: e.target.files?.[0] || null }))}
+              />
+            </div>
           </CardContent>
         </Card>
 

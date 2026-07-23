@@ -1,8 +1,6 @@
-import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, User, BookOpen, CheckSquare, Shield, LogOut, UserPlus, GraduationCap, Clock, Library } from 'lucide-react';
+import { Home, FileText, Users, ClipboardList, MessageSquare, Settings, BookOpen, CheckSquare, Shield, UserPlus, GraduationCap, Clock, Library } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { cn } from '@/utils/cn';
-import { Avatar } from '../ui/avatar';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   userRole?: 'student' | 'instructor' | 'head' | 'department_head' | 'admin';
@@ -38,6 +36,7 @@ const menuItems = {
     { icon: FileText, label: 'Duyệt đề tài', path: '/approve-topics' },
     { icon: Clock, label: 'Lịch phản biện', path: '/review-schedule' },
     { icon: Shield, label: 'Hội đồng', path: '/councils' },
+    { icon: FileText, label: 'Tạo form mẫu', path: '/grading-templates' },
     { icon: Library, label: 'Quản lý khóa học', path: '/manage-courses' },
     { icon: ClipboardList, label: 'Báo cáo', path: '/reports' },
     { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
@@ -53,19 +52,8 @@ const menuItems = {
 export function Sidebar({ userRole = 'student', userName = 'Nguyễn Văn A', userAvatar }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
-  // Map department_head to head for menu items
   const roleKey = userRole === 'department_head' ? 'head' : userRole;
   const items = menuItems[roleKey] || menuItems['student'];
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
 
   return (
     <div className="w-60 h-screen bg-sidebar text-sidebar-foreground flex flex-col fixed left-0 top-0">
@@ -106,29 +94,6 @@ export function Sidebar({ userRole = 'student', userName = 'Nguyễn Văn A', us
         })}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer">
-          <Avatar src={userAvatar} name={userName} size="md" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{userName}</p>
-            <p className="text-xs text-sidebar-accent-foreground truncate">
-              {userRole === 'student' && 'Sinh viên'}
-              {userRole === 'instructor' && 'Giảng viên'}
-              {userRole === 'head' && 'Trưởng bộ môn'}
-              {userRole === 'admin' && 'Quản trị viên'}
-            </p>
-          </div>
-          <User className="w-4 h-4 text-sidebar-accent-foreground" />
-        </div>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 mt-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-left text-sm"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Đăng xuất</span>
-        </button>
-      </div>
     </div>
   );
 }

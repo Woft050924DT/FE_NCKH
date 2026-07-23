@@ -1,38 +1,38 @@
 import { Routes, Route, Navigate } from 'react-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { Login } from '@/views/Auth/Login';
-import { StudentDashboard } from '@/views/Student/StudentDashboard';
-import { InstructorDashboard } from '@/views/Instructor/InstructorDashboard';
-import { HeadDashboard } from '@/views/Head/HeadDashboard';
-import { AdminDashboard } from '@/views/Admin/AdminDashboard';
-import { AdminOrganizationManagement } from '@/views/Admin/AdminOrganizationManagement';
-import { AdminUserManagement } from '@/views/Admin/AdminUserManagement';
-import { GroupManagement } from '@/views/Student/GroupManagement';
-import { TopicRegistration } from '@/views/Student/TopicRegistration';
-import { HeadApproveTopics } from '@/views/Head/HeadApproveTopics';
-import { DefenseCouncils } from '@/views/Management/DefenseCouncils';
-import { SystemSettings } from '@/views/Management/SystemSettings';
-import { HeadReports } from '@/views/Head/HeadReports';
-import { HeadMessages } from '@/views/Head/HeadMessages';
-import { HeadAssignInstructors } from '@/views/Head/HeadAssignInstructors';
-import { HeadAssignReviewers } from '@/views/Head/HeadAssignReviewers';
-import { HeadReviewSchedule } from '@/views/Head/HeadReviewSchedule';
-import { HeadGradingTemplates } from '@/views/Head/HeadGradingTemplates';
-import { ThesisRounds } from '@/views/Management/ThesisRounds';
-import { Messages } from '@/views/Shared/Messages';
-import { TimelinePage } from '@/views/Shared/TimelinePage';
-import { WeeklyReports } from '@/views/Student/WeeklyReports';
-import { Scores } from '@/views/Shared/Scores';
-import { MyTopics } from '@/views/Student/MyTopic';
-import { MyStudents } from '@/views/Instructor/MyStudents';
-import { InstructorReports } from '@/views/Instructor/InstructorReports';
-import { InstructorAllReports } from '@/views/Instructor/InstructorAllReports';
-import { InstructorGrading } from '@/views/Instructor/InstructorGrading';
-import { ReviewSchedule } from '@/views/Shared/ReviewSchedule';
-import { Courses } from '@/views/Management/Courses';
-import { InstructorCourse } from '@/views/Instructor/InstructorCourse';
-import { ManageCourses } from '@/views/Management/ManageCourses';
-import ApiTestPage from '@/views/Management/ApiTestPage';
+import { StudentDashboard } from '@/views/Student/Dashboard/StudentDashboard';
+import { InstructorDashboard } from '@/views/Instructor/Dashboard/InstructorDashboard';
+import { HeadDashboard } from '@/views/Head/Dashboard/HeadDashboard';
+import { AdminDashboard } from '@/views/Admin/Dashboard/AdminDashboard';
+import { AdminOrganizationManagement } from '@/views/Admin/Organization/AdminOrganizationManagement';
+import { AdminUserManagement } from '@/views/Admin/Users/AdminUserManagement';
+import { GroupManagement } from '@/views/Student/Groups/GroupManagement';
+import { TopicRegistration } from '@/views/Student/TopicRegistration/TopicRegistration';
+import { HeadApproveTopics } from '@/views/Head/ApproveTopics/HeadApproveTopics';
+import { DefenseCouncils } from '@/views/Head/DefenseCouncils/DefenseCouncils';
+import { SystemSettings } from '@/views/Admin/Settings/SystemSettings';
+import { HeadReports } from '@/views/Head/Reports/HeadReports';
+import { HeadMessages } from '@/views/Head/Messages/HeadMessages';
+import { HeadAssignInstructors } from '@/views/Head/AssignInstructors/HeadAssignInstructors';
+import { HeadAssignReviewers } from '@/views/Head/AssignReviewers/HeadAssignReviewers';
+import { HeadReviewSchedule } from '@/views/Head/ReviewSchedule/HeadReviewSchedule';
+import { HeadGradingTemplates } from '@/views/Head/GradingTemplates/HeadGradingTemplates';
+import { ThesisRounds } from '@/views/Head/ThesisRounds/ThesisRounds';
+import { Messages } from '@/views/Shared/Messages/Messages';
+import { TimelinePage } from '@/views/Student/Timeline/TimelinePage';
+import { WeeklyReports } from '@/views/Student/Reports/WeeklyReports';
+import { Scores } from '@/views/Student/Scores/Scores';
+import { MyTopics } from '@/views/Instructor/MyTopics/MyTopic';
+import { MyStudents } from '@/views/Instructor/Students/MyStudents';
+import { InstructorReports } from '@/views/Instructor/Reports/InstructorReports';
+import { InstructorAllReports } from '@/views/Instructor/Reports/InstructorAllReports';
+import { InstructorGrading } from '@/views/Instructor/Grading/InstructorGrading';
+import { ReviewSchedule } from '@/views/Instructor/ReviewSchedule/ReviewSchedule';
+import { Courses } from '@/views/Student/Courses/Courses';
+import { InstructorCourse } from '@/views/Instructor/Courses/InstructorCourse';
+import { ManageCourses } from '@/views/Head/ManageCourses/ManageCourses';
+
 
 export function ProtectedRoute({ 
   children, 
@@ -88,7 +88,7 @@ export function AppRoutes() {
       <Route path="/organization" element={<ProtectedRoute>{userRole === 'admin' && <AdminOrganizationManagement />}</ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute>{userRole === 'admin' && <AdminUserManagement />}</ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute>{userRole === 'admin' && <SystemSettings />}</ProtectedRoute>} />
-      <Route path="/api-test" element={<ApiTestPage />} />
+
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

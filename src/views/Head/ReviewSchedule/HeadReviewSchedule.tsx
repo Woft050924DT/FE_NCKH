@@ -246,12 +246,6 @@ export function HeadReviewSchedule() {
       userName={user?.fullName || 'PGS. TS. Nguyễn Văn A'}
       title="Quản lý lịch phản biện"
       subtitle="Lên lịch và quản lý các buổi phản biện khóa luận"
-      actions={
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo lịch mới
-        </Button>
-      }
     >
       {/* Select Round */}
       <Card className="mb-6">
@@ -291,7 +285,7 @@ export function HeadReviewSchedule() {
       {selectedRound && (
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -313,6 +307,10 @@ export function HeadReviewSchedule() {
                   <SelectItem value="CANCELLED">Đã hủy</SelectItem>
                 </SelectContent>
               </Select>
+              <Button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Tạo lịch mới
+              </Button>
             </div>
           </CardContent>
         </Card>

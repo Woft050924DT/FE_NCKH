@@ -518,16 +518,20 @@ export function MyTopics() {
                 <label className="block text-sm font-medium mb-2">Số thành viên tối thiểu</label>
                 <Input
                   type="number"
+                  min="1"
+                  step="1"
                   value={formData.min_members}
-                  onChange={(e) => setFormData({ ...formData, min_members: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, min_members: Math.max(1, parseInt(e.target.value) || 1) })}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Số thành viên tối đa</label>
                 <Input
                   type="number"
+                  min={formData.min_members || 1}
+                  step="1"
                   value={formData.max_members}
-                  onChange={(e) => setFormData({ ...formData, max_members: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, max_members: Math.max(formData.min_members || 1, parseInt(e.target.value) || 1) })}
                 />
               </div>
             </div>

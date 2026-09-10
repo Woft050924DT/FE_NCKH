@@ -61,7 +61,7 @@ export function SystemSettings() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Thời gian hết hạn session (phút)</label>
-              <Input type="number" defaultValue="120" />
+              <Input type="number" min="1" defaultValue="120" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Yêu cầu mật khẩu mạnh</label>
@@ -155,7 +155,7 @@ export function SystemSettings() {
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Thời gian tự động sao lưu (ngày)</label>
-              <Input type="number" defaultValue="7" />
+              <Input type="number" min="1" defaultValue="7" />
             </div>
             <div className="flex gap-2">
               <Button variant="outline">Sao lưu ngay</Button>

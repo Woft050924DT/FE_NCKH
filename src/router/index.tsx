@@ -19,6 +19,7 @@ import { SystemSettings } from '@/views/Admin/Settings/SystemSettings';
 import { HeadReports } from '@/views/Head/Reports/HeadReports';
 import { HeadMessages } from '@/views/Head/Messages/HeadMessages';
 import { HeadAssignInstructors } from '@/views/Head/AssignInstructors/HeadAssignInstructors';
+import { HeadAssignClasses } from '@/views/Head/AssignClasses/HeadAssignClasses';
 import { HeadAssignReviewers } from '@/views/Head/AssignReviewers/HeadAssignReviewers';
 import { HeadReviewSchedule } from '@/views/Head/ReviewSchedule/HeadReviewSchedule';
 import { HeadGradingTemplates } from '@/views/Head/GradingTemplates/HeadGradingTemplates';
@@ -92,6 +93,7 @@ export function AppRoutes() {
       <Route path="/timeline" element={<ProtectedRoute>{isStudent && <TimelinePage />}</ProtectedRoute>} />
       <Route path="/rounds" element={<ProtectedRoute>{(isHead || isAdmin || isAcademicAffairs) && <ThesisRounds />}</ProtectedRoute>} />
       <Route path="/assign-instructors" element={<ProtectedRoute>{(isHead || isAdmin || isAcademicAffairs) && <HeadAssignInstructors />}</ProtectedRoute>} />
+      <Route path="/assign-classes" element={<ProtectedRoute>{(isHead || isAdmin || isAcademicAffairs) && <HeadAssignClasses />}</ProtectedRoute>} />
       <Route path="/assign-reviewers" element={<ProtectedRoute>{(isHead || isAdmin || isAcademicAffairs) && <HeadAssignReviewers />}</ProtectedRoute>} />
       <Route path="/review-schedule" element={<ProtectedRoute>{(isHead || isAdmin || isAcademicAffairs) && <HeadReviewSchedule />}</ProtectedRoute>} />
       <Route path="/grading-templates" element={<ProtectedRoute>{(isHead || isAdmin) && <HeadGradingTemplates />}</ProtectedRoute>} />

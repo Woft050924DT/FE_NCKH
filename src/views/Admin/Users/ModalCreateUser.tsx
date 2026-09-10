@@ -64,18 +64,19 @@ export function ModalCreateUser({ isOpen, onClose, onSuccess }: ModalCreateUserP
           class_id: 1,
           major_id: 1,
         });
-      } else if (formData.role === 'instructor') {
+      } else if (formData.role === 'instructor' || formData.role === 'head') {
         await adminService.createInstructor({
-          instructor_code: formData.instructor_code.trim(),
+          instructor_code: formData.instructor_code?.trim() || `GV_${Date.now().toString().slice(-4)}`,
           department_id: 1,
-          degree: 'Thạc sĩ',
-          academic_title: 'Giảng viên',
+          degree: formData.role === 'head' ? 'Tiến sĩ' : 'Thạc sĩ',
+          academic_title: formData.role === 'head' ? 'Trưởng bộ môn' : 'Giảng viên',
           specialization: 'CNTT',
           username: formData.username.trim() || formData.email.split('@')[0],
           password: formData.password,
           email: formData.email.trim(),
           full_name: formData.full_name.trim(),
           phone: formData.phone.trim(),
+          role: formData.role,
         });
       } else {
         await adminService.createUser({
@@ -114,6 +115,7 @@ export function ModalCreateUser({ isOpen, onClose, onSuccess }: ModalCreateUserP
           >
             <option value="student">Sinh viên</option>
             <option value="instructor">Giảng viên</option>
+            <option value="head">Trưởng bộ môn</option>
             <option value="admin">Quản trị viên / Giáo vụ</option>
           </select>
         </div>
@@ -197,7 +199,7 @@ export function ModalCreateUser({ isOpen, onClose, onSuccess }: ModalCreateUserP
           </div>
         )}
 
-        {formData.role === 'instructor' && (
+        {(formData.role === 'instructor' || formData.role === 'head') && (
           <div className="p-3 bg-muted/40 rounded-lg space-y-3 border">
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Mã giảng viên (Tùy chọn)</Label>

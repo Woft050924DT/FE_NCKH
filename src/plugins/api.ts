@@ -2534,10 +2534,57 @@ export const thesisRoundsService = {
   async assignClasses(
     id: number,
     data: AssignClassesRequest,
-  ): Promise<AssignedClass[]> {
-    return apiClient.post<AssignedClass[]>(
+  ): Promise<any> {
+    return apiClient.post<any>(
       `/api/admin/thesis-rounds/${id}/assign-classes`,
       data,
+    );
+  },
+
+  /**
+   * Get classes assigned to a thesis round
+   * GET /api/admin/thesis-rounds/:id/classes
+   */
+  async getClassesByRound(id: number): Promise<any[]> {
+    return apiClient.get<any[]>(
+      `/api/admin/thesis-rounds/${id}/classes`,
+    );
+  },
+
+  /**
+   * Get individual students assigned to a thesis round
+   * GET /api/admin/thesis-rounds/:id/students
+   */
+  async getStudentsByRound(id: number): Promise<any[]> {
+    return apiClient.get<any[]>(
+      `/api/admin/thesis-rounds/${id}/students`,
+    );
+  },
+
+  /**
+   * Assign individual students to a thesis round
+   * POST /api/admin/thesis-rounds/:id/students
+   */
+  async assignIndividualStudents(
+    id: number,
+    studentIds: number[],
+  ): Promise<any> {
+    return apiClient.post<any>(
+      `/api/admin/thesis-rounds/${id}/students`,
+      { student_ids: studentIds },
+    );
+  },
+
+  /**
+   * Remove an individual student from a thesis round
+   * DELETE /api/admin/thesis-rounds/:id/students/:studentId
+   */
+  async removeIndividualStudent(
+    roundId: number,
+    studentId: number,
+  ): Promise<any> {
+    return apiClient.delete<any>(
+      `/api/admin/thesis-rounds/${roundId}/students/${studentId}`,
     );
   },
 
@@ -2595,6 +2642,18 @@ export const thesisRoundsService = {
   ): Promise<StandardResponse<ThesisRoundClass[]>> {
     const classes = await this.assignClasses(id, data);
     return { data: classes as any };
+  },
+  async getClassesByRoundForHead(id: number): Promise<any[]> {
+    return this.getClassesByRound(id);
+  },
+  async getAssignedStudentsForHead(id: number): Promise<any[]> {
+    return this.getStudentsByRound(id);
+  },
+  async assignIndividualStudentsForHead(id: number, studentIds: number[]): Promise<any> {
+    return this.assignIndividualStudents(id, studentIds);
+  },
+  async removeIndividualStudentForHead(roundId: number, studentId: number): Promise<any> {
+    return this.removeIndividualStudent(roundId, studentId);
   },
   async addGuidanceProcessForHead(
     id: number,

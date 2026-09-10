@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Check, Search, FileText } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, Search, FileText, School } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -327,7 +327,18 @@ export function TopicRegistration() {
           <div>
             <h2 className="text-lg font-semibold mb-4">1. CHỌN ĐỢT ĐĂNG KÝ</h2>
             <div className="space-y-4">
-              {thesisRounds.map((round: any) => {
+              {thesisRounds.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    <School className="w-10 h-10 mx-auto mb-3 opacity-40 text-primary" />
+                    <p className="font-medium text-foreground mb-1">Chưa có đợt nào mở cho lớp của bạn</p>
+                    <p className="text-xs">
+                      Hệ thống chỉ hiển thị các đợt đồ án / bài tập lớn khi lớp của bạn được phân công tham gia. Vui lòng liên hệ Trưởng bộ môn hoặc Giảng viên phụ trách để biết thêm chi tiết.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                thesisRounds.map((round: any) => {
                 const isActive = round.status?.toUpperCase() === 'ACTIVE';
                 const isUpcoming = round.status?.toUpperCase() === 'UPCOMING';
                 const isSelected = selectedRound === round.id;
@@ -388,10 +399,10 @@ export function TopicRegistration() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                    </Card>
+                  );
+                }))}
+              </div>
           </div>
 
           {/* Right Column: Select Supervisor */}

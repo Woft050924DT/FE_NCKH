@@ -167,8 +167,10 @@ export const ModalGradeReview: React.FC<ModalGradeReviewProps> = ({
                 <Input
                   type="number"
                   step="0.1"
+                  min="0"
+                  max="10"
                   value={originalScore}
-                  onChange={(e) => setOriginalScore(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setOriginalScore(Math.min(10, Math.max(0, parseFloat(e.target.value) || 0)))}
                   className="mt-1.5"
                   required
                 />

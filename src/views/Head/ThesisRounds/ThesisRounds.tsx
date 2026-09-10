@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Eye, Edit, Power, PlayCircle } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Plus, Search, Filter, Eye, Edit, Power, PlayCircle, School } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
@@ -13,6 +14,7 @@ import type { ThesisRound } from '@/types/api';
 import { translateStatus } from '@/helpers/constant';
 
 export function ThesisRounds() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userRole = user?.role || 'head';
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -340,6 +342,7 @@ export function ThesisRounds() {
                   <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Năm học</th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">HK</th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Thời gian</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Lớp tham gia</th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Trạng thái</th>
                   <th className="text-right py-4 px-6 text-sm font-medium text-muted-foreground">Thao tác</th>
                 </tr>
@@ -347,13 +350,13 @@ export function ThesisRounds() {
               <tbody>
                 {isFetchingRounds ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                    <td colSpan={9} className="py-8 text-center text-muted-foreground">
                       Đang tải...
                     </td>
                   </tr>
                 ) : rounds.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                    <td colSpan={9} className="py-8 text-center text-muted-foreground">
                       Chưa có đợt khóa luận nào
                     </td>
                   </tr>
@@ -379,12 +382,35 @@ export function ThesisRounds() {
                         {new Date(round.start_date).toLocaleDateString('vi-VN')} → {new Date(round.end_date).toLocaleDateString('vi-VN')}
                       </td>
                       <td className="py-4 px-6">
+                        {round.thesis_round_classes && round.thesis_round_classes.length > 0 ? (
+                          <Badge variant="outline" className="text-xs font-normal text-blue-600 bg-blue-50/60 border-blue-200">
+                            <School className="w-3 h-3 mr-1" />
+                            {round.thesis_round_classes.length} lớp
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-muted-foreground">
+                            Chưa gán
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="py-4 px-6">
                         <Badge variant={getStatusBadgeVariant(round.status as any)}>
                           {translateStatus(round.status as string)}
                         </Badge>
                       </td>
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/assign-classes?roundId=${round.id}`);
+                            }}
+                            title="Xếp lớp & Sinh viên tham gia"
+                          >
+                            <School className="w-4 h-4 text-emerald-600" />
+                          </Button>
                           <Button size="icon" variant="ghost" title="Xem chi tiết">
                             <Eye className="w-4 h-4 text-blue-500" />
                           </Button>
@@ -524,6 +550,7 @@ export function ThesisRounds() {
                 <Input
                   name="startDate"
                   type="date"
+                  disablePast
                   value={formData.startDate}
                   onChange={handleInputChange}
                   required
@@ -536,6 +563,7 @@ export function ThesisRounds() {
                 <Input
                   name="endDate"
                   type="date"
+                  min={formData.startDate || new Date().toISOString().split('T')[0]}
                   value={formData.endDate}
                   onChange={handleInputChange}
                   required
@@ -550,6 +578,8 @@ export function ThesisRounds() {
                 <Input
                   name="topicProposalDeadline"
                   type="date"
+                  min={formData.startDate || new Date().toISOString().split('T')[0]}
+                  max={formData.endDate || undefined}
                   value={formData.topicProposalDeadline}
                   onChange={handleInputChange}
                   required
@@ -562,6 +592,8 @@ export function ThesisRounds() {
                 <Input
                   name="registrationDeadline"
                   type="date"
+                  min={formData.topicProposalDeadline || formData.startDate || new Date().toISOString().split('T')[0]}
+                  max={formData.endDate || undefined}
                   value={formData.registrationDeadline}
                   onChange={handleInputChange}
                   required
@@ -576,6 +608,8 @@ export function ThesisRounds() {
                 <Input
                   name="reportSubmissionDeadline"
                   type="date"
+                  min={formData.registrationDeadline || formData.startDate || new Date().toISOString().split('T')[0]}
+                  max={formData.endDate || undefined}
                   value={formData.reportSubmissionDeadline}
                   onChange={handleInputChange}
                   required
@@ -652,6 +686,7 @@ export function ThesisRounds() {
                 <Input
                   name="startDate"
                   type="date"
+                  max={editFormData.endDate || undefined}
                   value={editFormData.startDate}
                   onChange={handleEditInputChange}
                   required
@@ -664,6 +699,7 @@ export function ThesisRounds() {
                 <Input
                   name="endDate"
                   type="date"
+                  min={editFormData.startDate || undefined}
                   value={editFormData.endDate}
                   onChange={handleEditInputChange}
                   required
@@ -678,6 +714,8 @@ export function ThesisRounds() {
                 <Input
                   name="registrationDeadline"
                   type="date"
+                  min={editFormData.startDate || undefined}
+                  max={editFormData.endDate || undefined}
                   value={editFormData.registrationDeadline}
                   onChange={handleEditInputChange}
                   required
@@ -692,6 +730,8 @@ export function ThesisRounds() {
                 <Input
                   name="topicProposalDeadline"
                   type="date"
+                  min={editFormData.startDate || undefined}
+                  max={editFormData.endDate || undefined}
                   value={editFormData.topicProposalDeadline}
                   onChange={handleEditInputChange}
                 />
@@ -703,6 +743,8 @@ export function ThesisRounds() {
                 <Input
                   name="reportSubmissionDeadline"
                   type="date"
+                  min={editFormData.registrationDeadline || editFormData.startDate || undefined}
+                  max={editFormData.endDate || undefined}
                   value={editFormData.reportSubmissionDeadline}
                   onChange={handleEditInputChange}
                 />
@@ -751,6 +793,7 @@ export function ThesisRounds() {
                   name="defaultMinMembers"
                   type="number"
                   min="1"
+                  step="1"
                   value={editFormData.defaultMinMembers}
                   onChange={handleEditInputChange}
                   disabled={editFormData.defaultGroupMode === 'INDIVIDUAL_ONLY'}
@@ -764,7 +807,8 @@ export function ThesisRounds() {
                 <Input
                   name="defaultMaxMembers"
                   type="number"
-                  min="1"
+                  min={editFormData.defaultMinMembers || "1"}
+                  step="1"
                   value={editFormData.defaultMaxMembers}
                   onChange={handleEditInputChange}
                   disabled={editFormData.defaultGroupMode === 'INDIVIDUAL_ONLY'}

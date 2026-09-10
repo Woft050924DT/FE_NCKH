@@ -745,6 +745,7 @@ export function HeadReviewSchedule() {
                     </label>
                     <Input
                       type="date"
+                      disablePast
                       value={form.scheduledDate}
                       onChange={(e) => updateScheduleForm(index, 'scheduledDate', e.target.value)}
                       required
@@ -852,6 +853,7 @@ export function HeadReviewSchedule() {
               <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Ngày phản biện</label>
               <Input
                 type="date"
+                disablePast
                 value={editFormData.scheduledDate}
                 onChange={(e) => setEditFormData({ ...editFormData, scheduledDate: e.target.value })}
               />
@@ -938,6 +940,7 @@ export function HeadReviewSchedule() {
               </label>
               <Input
                 type="date"
+                disablePast
                 value={autoScheduleForm.date}
                 onChange={(e) => setAutoScheduleForm({ ...autoScheduleForm, date: e.target.value })}
                 required
@@ -1100,6 +1103,7 @@ export function HeadReviewSchedule() {
                           </label>
                           <Input
                             type="date"
+                            disablePast
                             className="h-8 text-xs"
                             value={item.scheduledDate}
                             onChange={(e) => updatePreviewItem(index, 'scheduledDate', e.target.value)}

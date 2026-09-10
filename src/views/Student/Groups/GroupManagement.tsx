@@ -676,8 +676,10 @@ export function GroupManagement() {
               <Input 
                 id="min_members"
                 type="number" 
+                min="1"
+                step="1"
                 value={createGroupForm.min_members}
-                onChange={(e) => setCreateGroupForm({ ...createGroupForm, min_members: parseInt(e.target.value) })}
+                onChange={(e) => setCreateGroupForm({ ...createGroupForm, min_members: Math.max(1, parseInt(e.target.value) || 1) })}
                 className="mt-2"
               />
             </div>
@@ -686,8 +688,10 @@ export function GroupManagement() {
               <Input 
                 id="max_members"
                 type="number" 
+                min={createGroupForm.min_members || 1}
+                step="1"
                 value={createGroupForm.max_members}
-                onChange={(e) => setCreateGroupForm({ ...createGroupForm, max_members: parseInt(e.target.value) })}
+                onChange={(e) => setCreateGroupForm({ ...createGroupForm, max_members: Math.max(createGroupForm.min_members || 1, parseInt(e.target.value) || 1) })}
                 className="mt-2"
               />
             </div>

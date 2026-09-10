@@ -290,6 +290,7 @@ export function TimelinePage() {
                 <Label>Ngày bắt đầu</Label>
                 <Input 
                   type="date" 
+                  disablePast
                   value={newTask.startDate}
                   onChange={(e) => setNewTask({...newTask, startDate: e.target.value})}
                 />
@@ -298,6 +299,7 @@ export function TimelinePage() {
                 <Label>Hạn chót (Deadline) <span className="text-red-500">*</span></Label>
                 <Input 
                   type="date" 
+                  min={newTask.startDate || new Date().toISOString().split('T')[0]}
                   value={newTask.dueDate}
                   onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
                 />

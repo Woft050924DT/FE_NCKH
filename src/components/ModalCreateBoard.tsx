@@ -388,6 +388,7 @@ export function ModalCreateBoard({ isOpen, onClose, onSuccess, thesisRoundId }: 
               id="defense_date"
               name="defense_date"
               type="date"
+              disablePast
               value={formData.defense_date}
               onChange={handleChange}
               className="text-xs"

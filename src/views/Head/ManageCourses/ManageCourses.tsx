@@ -196,7 +196,7 @@ export function ManageCourses() {
         <form className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <Input label="Mã môn học" placeholder="VD: CS301" required />
-            <Input label="Tín chỉ" type="number" placeholder="VD: 3" required />
+            <Input label="Tín chỉ" type="number" min="1" placeholder="VD: 3" required />
           </div>
 
           <Input label="Tên môn học" placeholder="VD: Lập trình Web nâng cao" required />
@@ -229,7 +229,7 @@ export function ManageCourses() {
           />
 
           <div className="grid grid-cols-3 gap-4">
-            <Input label="Số sinh viên tối đa" type="number" defaultValue="60" />
+            <Input label="Số sinh viên tối đa" type="number" min="1" defaultValue="60" />
             <Input label="Thứ" placeholder="VD: 2, 4" />
             <Input label="Phòng" placeholder="VD: A101" />
           </div>

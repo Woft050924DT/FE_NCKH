@@ -440,6 +440,7 @@ export function HeadAssignReviewers() {
               <label className="block text-sm font-medium">Hạn chót nộp phiếu phản biện</label>
               <Input
                 type="date"
+                disablePast
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
               />

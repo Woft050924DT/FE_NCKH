@@ -293,7 +293,7 @@ export function HeadGradingTemplates() {
     setCriteriaList(prev => {
       const next = [...prev];
       if (field === 'max_score') {
-        next[index].max_score = parseFloat(value) || 0;
+        next[index].max_score = Math.max(0, parseFloat(value) || 0);
       } else {
         next[index].name = value;
       }
@@ -380,7 +380,7 @@ export function HeadGradingTemplates() {
     setEditCriteriaList(prev => {
       const next = [...prev];
       if (field === 'max_score') {
-        next[index].max_score = parseFloat(value) || 0;
+        next[index].max_score = Math.max(0, parseFloat(value) || 0);
       } else {
         next[index].name = value;
       }

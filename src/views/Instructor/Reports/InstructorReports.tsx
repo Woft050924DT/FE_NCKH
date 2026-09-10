@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { translateStatus } from '@/helpers/constant';
 import { Badge, getStatusBadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -250,7 +251,7 @@ export function InstructorReports() {
               <Label htmlFor="weeklyScore" className="text-right pt-2">
                 Điểm số (0-10)
               </Label>
-              <input
+              <Input
                 id="weeklyScore"
                 type="number"
                 min="0"
@@ -258,7 +259,7 @@ export function InstructorReports() {
                 step="0.1"
                 value={feedbackForm.weeklyScore}
                 onChange={(e) => setFeedbackForm({ ...feedbackForm, weeklyScore: e.target.value })}
-                className="col-span-3 px-3 py-2 bg-background border border-input rounded-lg"
+                className="col-span-3"
                 placeholder="8.5"
               />
             </div>

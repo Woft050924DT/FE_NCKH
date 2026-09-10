@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Users, FileCheck, Clock, TrendingUp, X, Eye } from 'lucide-react';
+import { Link } from 'react-router';
+import { Users, FileCheck, Clock, TrendingUp, X, Eye, Shield, School, GraduationCap, Building2, BookOpen, KeyRound } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { TopicRegistration } from '@/types/api';
 
 export function InstructorDashboard() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const userRole = user?.role || 'instructor';
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -186,6 +187,58 @@ export function InstructorDashboard() {
     }
   };
 
+  const grantedModules = [
+    {
+      icon: School,
+      label: 'Quản lý Lớp học',
+      path: '/academic/classes',
+      description: 'Xem và quản lý danh sách các lớp sinh viên',
+      isGranted: hasPermission('view-classes') || hasPermission('manage-classes'),
+    },
+    {
+      icon: GraduationCap,
+      label: 'Quản lý Sinh viên',
+      path: '/academic/students',
+      description: 'Xem thông tin và danh sách sinh viên các khóa',
+      isGranted: hasPermission('view-students') || hasPermission('manage-students'),
+    },
+    {
+      icon: Users,
+      label: 'Quản lý Giảng viên',
+      path: '/academic/instructors',
+      description: 'Xem thông tin giảng viên và bộ môn',
+      isGranted: hasPermission('view-instructors') || hasPermission('manage-instructors'),
+    },
+    {
+      icon: Building2,
+      label: 'Tổ chức đào tạo',
+      path: '/organization',
+      description: 'Xem và quản lý cơ cấu Khoa - Bộ môn',
+      isGranted: hasPermission('view-faculties') || hasPermission('manage-faculties') || hasPermission('view-departments') || hasPermission('manage-departments'),
+    },
+    {
+      icon: BookOpen,
+      label: 'Đợt khóa luận',
+      path: '/rounds',
+      description: 'Theo dõi và cấu hình đợt khóa luận tốt nghiệp',
+      isGranted: hasPermission('view-round-list') || hasPermission('create-round'),
+    },
+    {
+      icon: Shield,
+      label: 'Hội đồng bảo vệ',
+      path: '/councils',
+      description: 'Xem lịch hội đồng và phân công đề tài',
+      isGranted: hasPermission('view-council-list') || hasPermission('create-council'),
+    },
+    {
+      icon: KeyRound,
+      label: 'Phân quyền vai trò',
+      path: '/policies',
+      description: 'Cấu hình quyền hạn các vai trò trong hệ thống',
+      isGranted: hasPermission('manage-roles'),
+    },
+  ].filter((m) => m.isGranted);
+
   return (
     <PageLayout
       userRole={userRole as any}
@@ -193,6 +246,54 @@ export function InstructorDashboard() {
       title="Dashboard Giảng viên"
       subtitle="Tổng quan công việc hướng dẫn và phản biện"
     >
+      {/* Phân quyền quản trị bổ sung được cấp */}
+      {grantedModules.length > 0 && (
+        <div className="mb-8 p-5 bg-card border border-primary/20 rounded-2xl shadow-sm bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-background">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-primary/10 text-primary rounded-xl">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+                  Chức năng quản lý được phân quyền bổ sung
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+                    {grantedModules.length} mô-đun
+                  </Badge>
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Tài khoản của bạn đã được cấp quyền quản lý các mô-đun sau bởi Quản trị viên:
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {grantedModules.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex items-center gap-3 p-3.5 bg-background border border-border rounded-xl hover:border-primary hover:shadow-sm transition-all group"
+                >
+                  <div className="p-2.5 bg-muted rounded-lg text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs sm:text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                      {item.label}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {item.description}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
